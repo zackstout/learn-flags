@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <div>Your unlocked flags</div>
-    <MyFlags :subregionCountries="subregionCountries" />
+    <MyFlags :subregionCountries="subregionCountries" @newFlags="handleNewFlags" />
 
-    <!-- <LearnFlagsComponent :countries="subregionCountries[0].countries" /> -->
+    <LearnFlags :countries="newFlags" v-if="newFlags.length > 0" />
 
-    <!-- <QuizComponent :questions="quizQuestions" :flagFirst="true" :db="db" /> -->
+    <!-- <Quiz :questions="quizQuestions" :flagFirst="true" :db="db" /> -->
   </div>
 </template>
 
@@ -15,18 +15,9 @@ import * as d3 from "d3";
 import * as axios from "axios";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue } from "firebase/database";
-import QuizComponent from "@/components/Quiz.vue";
-import LearnFlagsComponent from "@/components/LearnFlags.vue";
+import Quiz from "@/components/Quiz.vue";
+import LearnFlags from "@/components/LearnFlags.vue";
 import MyFlags from "@/components/MyFlags.vue";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBDhXVtVZwURQEtUPsdleJp6XEUulRZC-Y",
-  authDomain: "flags-79ae1.firebaseapp.com",
-  projectId: "flags-79ae1",
-  storageBucket: "flags-79ae1.appspot.com",
-  messagingSenderId: "918730653461",
-  appId: "1:918730653461:web:a1347aef7e5b1bdc6bb31c",
-};
 
 // what?! so many aspect ratios: https://en.wikipedia.org/wiki/List_of_aspect_ratios_of_national_flags
 
@@ -76,33 +67,21 @@ quiz options...
 Some fun message that you can unlock new flags. :)
 
 
-
 TODOS:
 - [x] Add regions, put subregions under them in MyFlags
 - [ ] Put "learn flags" and "test" behind buttons, and in modals
 - [ ] Wire up tracking of answers
 - [x] Build out view of MyFlags (flag cards, gray out locked countries and subregions and regions)
 - [x] test quiz generation logic for subregions and regions
-- [ ] add logic for "can unlock new flags" and "can unlock new regions" (latter should be very easy)
-- [ ] add messaging/feedback for "can't unlock yet" (expose more quiz buttons for each? only show one at time?)
-- [ ] clarify quiz params.. flagfirst, pool (easy...), number?
+- [x] add logic for "can unlock new flags" and "can unlock new regions" (latter should be very easy)
+- [ ] need "today" logic
+- [x] add messaging/feedback for "can't unlock yet" 
+- [ ] (expose more quiz buttons for each? only show one at time?)
+- [ ] clarify quiz params.. flagfirst, pool (easy...), number? Just choose at random?
 - [ ] would like it to LOOK/FEEL good!
-*/
 
-export const stub = (str) => {
-  return str.replace(/\s/g, "_").replace(/\./g, "%");
-};
 
-export const unstub = (str) => {
-  return str.replace(/_/g, " ").replace(/%/g, ".");
-};
-
-const NEW_FLAGS_AMOUNT = 3;
-
-// DOESN'T INCLUDE MAX
-const getRandom = (min, max) => {
-  return min + Math.floor(Math.random() * (max - min));
-};
+Quiz stuff:
 
 // NOTE: this may need  to take in MORE than just pool (of quiz questions), to generate  answers
 // Maybe to start...Just pull from all countries/flags?
@@ -123,6 +102,32 @@ const getRandom = (min, max) => {
 // Optional parameter: list of "pre-picked" questions, I guess
 
 // One wrinkle: add to pool if countryFirst (because random flags are good and cool)
+*/
+
+// ==================================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBDhXVtVZwURQEtUPsdleJp6XEUulRZC-Y",
+  authDomain: "flags-79ae1.firebaseapp.com",
+  projectId: "flags-79ae1",
+  storageBucket: "flags-79ae1.appspot.com",
+  messagingSenderId: "918730653461",
+  appId: "1:918730653461:web:a1347aef7e5b1bdc6bb31c",
+};
+
+export const stub = (str) => {
+  return str.replace(/\s/g, "_").replace(/\./g, "%");
+};
+
+export const unstub = (str) => {
+  return str.replace(/_/g, " ").replace(/%/g, ".");
+};
+
+// DOESN'T INCLUDE MAX
+export const getRandom = (min, max) => {
+  return min + Math.floor(Math.random() * (max - min));
+};
+
 const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
   let indices = [];
   if (pickedIndices.length > 0) {
@@ -169,8 +174,8 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
 
 @Component({
   components: {
-    QuizComponent,
-    LearnFlagsComponent,
+    Quiz,
+    LearnFlags,
     MyFlags,
   },
 })
@@ -178,50 +183,18 @@ export default class App extends Vue {
   allSubregions = [];
   db: any;
   databaseCountries: any = [];
+
+  // If this has membres, we should be showing quiz modal
   quizQuestions: any[] = [];
 
+  // If this has members, we should be showing LearnFlags modal
+  newFlags = [];
+
+  handleNewFlags(flags) {
+    this.newFlags = flags;
+  }
+
   // - [ ] TODO: subregion could be a class, with all methods on there
-
-  // maybe have getCountriesForSubregion?
-
-  canUnlockMoreFromSubregion() {}
-
-  getMostRecentlyReviewedCountries() {}
-
-  // Only need this for case user unlocks but doesn't review......which we do care about because we say "unlocked"
-  getMostRecentlyUnlockedCountries() {}
-
-  getCountriesWithMissesInSubregion(subregion: string) {
-    // Good for populating quiz of "try again" flags
-  }
-
-  getTotalSuccessesInSubregion(subregion: string) {
-    // Should sum how many times each country/flag in the subregion has been successfully reviewed
-  }
-
-  getTotalReviewsInSubregion(subregion: string) {
-    // Should sum how many times each country/flag in the subregion has been reviewed
-  }
-
-  // OOOOk confusion is that data is coming from 2 sources, countries and databaseCountries.
-
-  // getCountries(subregion: string) {
-  //   return Object.keys(this.databaseCountries)
-  //     .map((name) => this.countries.find((c) => c.name === unstub(name)))
-  //     .filter((c) => c.subregion === subregion);
-  // }
-
-  getLockedCountries(subregion: string) {
-    // return Object.keys(this.databaseCountries).filter((name) => {
-    //   const country = this.countries.find((c) => c.name === unstub(name));
-    //   return !this.databaseCountries[name].isUnlocked && country.subregion === subregion;
-    // });
-    // return this.getCountries(subregion).filter(c=>!)
-  }
-
-  getUnlockedCountries(subregion: string) {
-    //
-  }
 
   initData(row) {
     // Ok great this was just needed to setup the DB, seems to work:
@@ -244,18 +217,10 @@ export default class App extends Vue {
       return {
         name: subregion.name,
         countries: subregion.values.map((country) => {
-          const c = this.databaseCountries.find((c) => unstub(c.name) === country.name); // unstub??
-          // console.log("doc", country, c);
+          const c = this.databaseCountries.find((c) => unstub(c.name) === country.name);
           return Object.assign({}, country, c);
         }),
       };
-    });
-  }
-
-  // for MyFlags to consume
-  get unlockedSubregionCountries() {
-    return this.subregionCountries.map((region) => {
-      return Object.assign({}, region, { countries: region.countries.filter((c) => c.isUnlocked) });
     });
   }
 
@@ -264,14 +229,17 @@ export default class App extends Vue {
     const db = getDatabase();
     this.db = db;
 
+    document.addEventListener("mousedown", () => {
+      this.newFlags = [];
+    });
+
     onValue(ref(db, "countries"), (snapshot) => {
       const data = snapshot.val();
+
+      // This *should* "just work" ... and cause subregionCountries to update
       this.databaseCountries = Object.keys(data).map((name) => {
         return Object.assign({ name }, data[name]);
       });
-      // console.log("dbc", this.databaseCountries);
-
-      // console.log("locked", this.getLockedCountries("Southern Asia"));
     });
 
     // Transform data for markup to consume:
@@ -283,21 +251,21 @@ export default class App extends Vue {
           allSubregions[row.subregion] = [];
         }
         allSubregions[row.subregion].push(row);
+
+        // Only needed once to init database:
         // this.initData(row);
       });
 
-      // this.countries = res.data;
       this.allSubregions = Object.keys(allSubregions).map((name) => {
         return { name, values: allSubregions[name] };
       });
 
-      this.$nextTick(() => {
-        console.log("all", allSubregions, this.subregionCountries);
-      });
       // console.log("QUIZ", generateQuiz(this.countries, 5));
       const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
       console.log("Quiz", quiz, this.subregionCountries[0].countries);
       this.quizQuestions = quiz;
+
+      this.newFlags = this.subregionCountries[0].countries;
     });
   }
 }
@@ -329,4 +297,9 @@ img {
   max-height: 50vh;
   margin: 2rem 0;
 } */
+
+button {
+  font-size: 2rem;
+  padding: 1rem;
+}
 </style>

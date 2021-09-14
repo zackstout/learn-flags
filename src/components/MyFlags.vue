@@ -10,7 +10,9 @@
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
           <div>
-            <button :disabled="unlockFlagsDisabled(subregion).value">Unlock flags</button>
+            <button :disabled="unlockFlagsDisabled(subregion).value" @click="unlockFlags(subregion)">
+              Unlock flags
+            </button>
             <div style="color:red;">{{ unlockFlagsDisabled(subregion).message }}</div>
           </div>
 
@@ -44,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { unstub } from "@/App.vue";
+import { getRandom, unstub } from "@/App.vue";
 
 const REGIONS = [
   {
@@ -85,6 +87,8 @@ const UNLOCK_COUNTRIES_RULES = {
   LEVEL_OF_COMPETENCE: [0, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6],
 };
 
+export const NEW_FLAGS_AMOUNT = 3;
+
 @Component({
   components: {},
 })
@@ -92,15 +96,31 @@ export default class MyFlagsComponent extends Vue {
   @Prop() readonly subregionCountries: any[];
   regions = REGIONS;
 
-  //  Oh wait this  needs to go by subregion OR region....
-  //   cannotUnlockFlagsMessage = "ccnnot";
-
   numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
   unstubInner(x) {
     return unstub(x);
+  }
+
+  unlockFlags(subregion: string) {
+    console.log("Unlock!", subregion);
+    const lockedCountries = this.getCountries(subregion).filter((c) => !c.isUnlocked);
+    let indices = [];
+    if (lockedCountries.length < NEW_FLAGS_AMOUNT) {
+      indices = lockedCountries.map((c, i) => i);
+    } else {
+      while (indices.length < NEW_FLAGS_AMOUNT) {
+        const r = getRandom(0, lockedCountries.length);
+        if (!indices.includes(r)) indices.push(r);
+      }
+    }
+    const newFlags = indices.map((i) => lockedCountries[i]);
+
+    // TODO: Mark them all as unlocked in the database
+
+    this.$emit("newFlags", newFlags);
   }
 
   // Should return a message  and a boolean  "value"
@@ -143,7 +163,7 @@ export default class MyFlagsComponent extends Vue {
 
   getRuleIndex(countries) {
     const numUnlocked = countries.filter((c) => c.isUnlocked).length;
-    const ruleIndex = Math.floor(numUnlocked / 3);
+    const ruleIndex = Math.floor(numUnlocked / NEW_FLAGS_AMOUNT);
     return ruleIndex;
   }
 
@@ -189,12 +209,29 @@ export default class MyFlagsComponent extends Vue {
   }
 
   // -[x] TODO: sort so that subregions with unlocked flags are always on top
-  // No idea why this triggers infinite loop error...
+  // No idea why this triggers infinite loop error...because no slice!
   sortSubregions(subregions) {
-    return subregions.sort((a: any, b: any) => {
+    return subregions.slice(0).sort((a: any, b: any) => {
       return this.getUnlockedCountries(b).length - this.getUnlockedCountries(a).length;
     });
   }
+
+  //   getMostRecentlyReviewedCountries() {}
+
+  //   // Only need this for case user unlocks but doesn't review......which we do care about because we say "unlocked"
+  //   getMostRecentlyUnlockedCountries() {}
+
+  //   getCountriesWithMissesInSubregion(subregion: string) {
+  //     // Good for populating quiz of "try again" flags
+  //   }
+
+  //   getTotalSuccessesInSubregion(subregion: string) {
+  //     // Should sum how many times each country/flag in the subregion has been successfully reviewed
+  //   }
+
+  //   getTotalReviewsInSubregion(subregion: string) {
+  //     // Should sum how many times each country/flag in the subregion has been reviewed
+  //   }
 }
 </script>
 

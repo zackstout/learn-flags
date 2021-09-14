@@ -1,29 +1,33 @@
 <template>
-  <div class="learn">
-    <h1>New flags unlocked!</h1>
+  <div>
+    <div class="modal"></div>
+    <div class="modal-inner" ref="inner">
+      <h1>New flags unlocked!</h1>
 
-    <div>Flag {{ countryIndex + 1 }} of {{ countries.length }}</div>
+      <div>Flag {{ countryIndex + 1 }} of {{ countries.length }}</div>
 
-    <div class="carets">
-      <div class="caret" @click="decrement">&#12296;</div>
-      <div class="caret" style="transform:rotate(180deg); margin-left:2rem;" @click="increment">&#12296;</div>
-    </div>
-
-    <div class="country">
-      <div>
-        <h1>{{ currentCountry.name }}</h1>
-        <h4>Region: {{ currentCountry.region }}</h4>
-        <h5>Subregion: {{ currentCountry.subregion }}</h5>
-        <h5>Capital: {{ currentCountry.capital }}</h5>
-        <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5>
+      <div class="carets">
+        <div class="caret" @click="decrement">&#12296;</div>
+        <div class="caret" style="transform:rotate(180deg); margin-left:2rem;" @click="increment">&#12296;</div>
       </div>
-      <div class="flag" :style="{ backgroundImage: 'url(' + currentCountry.flag + ')' }"></div>
+
+      <div class="country">
+        <div>
+          <h1>{{ unstubInner(currentCountry.name) }}</h1>
+          <h4>Region: {{ currentCountry.region }}</h4>
+          <h5>Subregion: {{ currentCountry.subregion }}</h5>
+          <h5>Capital: {{ currentCountry.capital }}</h5>
+          <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5>
+        </div>
+        <div class="flag" :style="{ backgroundImage: 'url(' + currentCountry.flag + ')' }"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { unstub } from "@/App.vue";
 
 interface Country {
   name: string;
@@ -31,6 +35,8 @@ interface Country {
 }
 
 // TODO: Should be "take quiz" immediately from this view button.
+// TODO: Should immediately mark all as "unlocked" once this mounts (or just before passing to this modal?)
+// That way, when this modal closes, they will show up as unlocked.
 
 @Component({
   components: {},
@@ -41,13 +47,21 @@ export default class LearnFlagsComponent extends Vue {
 
   countryIndex = 0;
 
+  unstubInner(x) {
+    return x ? unstub(x) : "";
+  }
+
+  mounted() {
+    (this.$refs.inner as HTMLElement).addEventListener("mousedown", (ev: any) => ev.stopPropagation());
+  }
+
   numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return x && x.toString() ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
   }
 
   get currentCountry() {
     // console.log("curr....", this.countries);
-    return this.countries ? this.countries[this.countryIndex] : {};
+    return this.countries.length > 0 ? this.countries[this.countryIndex] : {};
   }
 
   increment() {
@@ -78,7 +92,7 @@ export default class LearnFlagsComponent extends Vue {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  width: 60vw;
+  width: 50vw;
   height: 50vh;
 }
 
@@ -97,5 +111,35 @@ export default class LearnFlagsComponent extends Vue {
 .caret:hover {
   background: gray;
   color: white;
+}
+
+.modal {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  opacity: 50%;
+  background: gray;
+  z-index: 40;
+}
+
+.modal-inner {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  height: 80vh;
+  width: 80vw;
+  border-radius: 2%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  opacity: 100%;
+  background: white;
+  padding: 2rem;
+  z-index: 50;
 }
 </style>
