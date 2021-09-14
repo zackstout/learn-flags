@@ -1,56 +1,58 @@
 Continent,Name,Specific
-Africa,Algeria,Middle East
-Africa,Angola,
-Africa,Benin,
-Africa,Botswana,
-Africa,Burkina Faso,
-Africa,Burundi,
-Africa,Cape Verde,
-Africa,Cameroon,
-Africa,Central African Republic,
-Africa,Chad,
-Africa,Comoros,
-Africa,Congo - the Democratic Republic of the,
-Africa,Congo,
-Africa,Djibouti,
-Africa,Egypt,Middle East
-Africa,Equatorial Guinea,
-Africa,Eritrea,
-Africa,Ethiopia,
-Africa,Gabon,
-Africa,Gambia,
-Africa,Ghana,
-Africa,Guinea,
-Africa,Guinea-Bissau,
-Africa,Kenya,
-Africa,Lesotho,
-Africa,Liberia,
-Africa,Libya,Middle East
-Africa,Madagascar,
-Africa,Malawi,
-Africa,Mali,
-Africa,Mauritania,
-Africa,Mauritius,
-Africa,Morocco,Middle East
-Africa,Mozambique,
-Africa,Namibia,
-Africa,Niger,
-Africa,Nigeria,
-Africa,Rwanda,
-Africa,Sao Tome and Principe,
-Africa,Senegal,
-Africa,Seychelles,
-Africa,Sierra Leone,
-Africa,Somalia,
-Africa,South Africa,
-Africa,South Sudan,
-Africa,Sudan,
-Africa,Tanzania - United Republic of,
-Africa,Togo,
-Africa,Tunisia,Middle East
-Africa,Uganda,
-Africa,Zambia,
-Africa,Zimbabwe,
+Africa,Algeria,North
+Africa,Angola,Central
+Africa,Benin,West
+Africa,Botswana,South
+Africa,Burkina Faso,West
+Africa,Burundi,East
+Africa,Cape Verde,West
+Africa,Cameroon,Central
+Africa,Central African Republic,Central
+Africa,Chad,Central
+Africa,Comoros,East
+Africa,Congo - the Democratic Republic of the,Central
+Africa,Congo,Central
+Africa,Djibouti,East
+Africa,Egypt,North
+Africa,Equatorial Guinea,Central
+Africa,Eritrea,East
+Africa,Ethiopia,East
+Africa,Gabon,Central
+Africa,Gambia,West
+Africa,Ghana,West
+Africa,Guinea,West
+Africa,Guinea-Bissau,West
+Africa,Kenya,East
+Africa,Lesotho,South
+Africa,Liberia,West
+Africa,Libya,North
+Africa,Madagascar,East
+Africa,Malawi,East
+Africa,Mali,West
+Africa,Mauritania,West
+Africa,Mauritius,East
+Africa,Morocco,North
+Africa,Mozambique,East
+Africa,Namibia,South
+Africa,Niger,West
+Africa,Nigeria,West
+Africa,Rwanda,East
+Africa,Sao Tome and Principe,Central
+Africa,Senegal,West
+Africa,Seychelles,East
+Africa,Sierra Leone,West
+Africa,Somalia,East
+Africa,South Africa,South
+Africa,South Sudan,East
+Africa,Sudan,North
+Africa,Tanzania - United Republic of,East
+Africa,Togo,West
+Africa,Tunisia,North
+Africa,Uganda,East
+Africa,Zambia,East
+Africa,Zimbabwe,East
+Africa,Côte d'Ivoire,West
+Africa,Swaziland,South
 Americas,Antigua and Barbuda,Caribbean
 Americas,Argentina,South America
 Americas,Bahamas,Caribbean
@@ -86,103 +88,136 @@ Americas,Trinidad and Tobago,Caribbean
 Americas,United States,
 Americas,Uruguay,South America
 Americas,Venezuela - Bolivarian Republic of,South America
-Asia,Afghanistan,
-Asia,Albania,
-Asia,Azerbaijan,
-Asia,Bahrain,Middle East
-Asia,Bangladesh,
-Asia,Bhutan,
-Asia,Brunei Darussalam,
-Asia,Cambodia,
-Asia,China,
-Asia,Fiji,
-Asia,India,
-Asia,Indonesia,
-Asia,Iran - Islamic Republic of,Middle East
-Asia,Iraq,Middle East
-Asia,Israel,Middle East
-Asia,Japan,
-Asia,Jordan,Middle East
-Asia,Kazakhstan,
-Asia,Kiribati,
-Asia,Kuwait,Middle East
-Asia,Kyrgyzstan,
-Asia,Malaysia,
-Asia,Maldives,
-Asia,Micronesia - Federated States of,
-Asia,Mongolia,
-Asia,Myanmar,
-Asia,Nepal,
-Asia,Korea - Democratic People's Republic of,
-Asia,Oman,Middle East
-Asia,Pakistan,
-Asia,Papua New Guinea,
-Asia,Philippines,
-Asia,Qatar,Middle East
-Asia,Russian Federation,
-Asia,Saudi Arabia,Middle East
-Asia,Singapore,
-Asia,Korea - Republic of,
-Asia,Sri Lanka,
-Asia,Syrian Arab Republic,Middle East
-Asia,Taiwan,
-Asia,Tajikistan,
-Asia,Thailand,
-Asia,Timor-Leste,
-Asia,Tonga,
-Asia,Turkey,Middle East
-Asia,Turkmenistan,
-Asia,United Arab Emirates,Middle East
-Asia,Viet Nam,
-Asia,Yemen,Middle East
-Europe,Andorra,
-Europe,Armenia,
-Europe,Austria,
-Europe,Belarus,
-Europe,Belgium,
-Europe,Bosnia and Herzegovina,
-Europe,Bulgaria,
-Europe,Croatia,
-Europe,Cyprus,
-Europe,Czech Republic,
-Europe,Denmark,
-Europe,Estonia,
-Europe,Finland,
-Europe,France,
-Europe,Georgia,
-Europe,Germany,
-Europe,Greece,
-Europe,Hungary,
-Europe,Iceland,
-Europe,Ireland,
-Europe,Italy,
-Europe,Latvia,
-Europe,Lebanon,Middle East
-Europe,Liechtenstein,
-Europe,Lithuania,
-Europe,Luxembourg,
-Europe,Malta,
-Europe,Moldova - Republic of,
-Europe,Monaco,
-Europe,Montenegro,
-Europe,Netherlands,
-Europe,Macedonia - the former Yugoslav Republic of,
-Europe,Norway,
-Europe,Palestine - State of,Middle East
-Europe,Poland,
-Europe,Portugal,
-Europe,Romania,
-Europe,San Marino,
-Europe,Serbia,
-Europe,Slovakia,
-Europe,Slovenia,
-Europe,Spain,
-Europe,Sweden,
-Europe,Switzerland,
-Europe,Ukraine,
-Europe,United Kingdom,
-Europe,Uzbekistan,
-Europe,Holy See (Vatican City State),
+Americas,Anguilla,Caribbean
+Americas,Aruba,Caribbean
+Americas,Bermuda,Caribbean
+Americas,Bonaire - Sint Eustatius and Saba,Caribbean
+Americas,Bouvet Island,Caribbean
+Americas,Cayman Islands,Caribbean
+Americas,Curaçao,Caribbean
+Americas,Falkland Islands (Malvinas),South America
+Americas,French Guiana,South America
+Americas,Guadeloupe,Caribbean
+Americas,Martinique,Caribbean
+Americas,Montserrat,Caribbean
+Americas,Puerto Rico,Caribbean
+Americas,Saint Barthélemy,Caribbean
+Africa,Saint Helena - Ascension and Tristan da Cunha,West
+Americas,Saint Pierre and Miquelon,Caribbean
+Americas,Virgin Islands - British,Caribbean
+Americas,Virgin Islands - U.S.,Caribbean
+Americas,Saint Martin (French part),Caribbean
+Americas,Sint Maarten (Dutch part),Caribbean
+Americas,Turks and Caicos Islands,Caribbean
+Asia,Afghanistan,South
+Asia,Azerbaijan,West
+Asia,Bahrain,West
+Asia,Bangladesh,South
+Asia,Bhutan,South
+Asia,Brunei Darussalam,Southeast
+Asia,Cambodia,Southeast
+Asia,China,East
+Asia,India,South
+Asia,Indonesia,Southeast
+Asia,Iran - Islamic Republic of,South
+Asia,Iraq,West
+Asia,Israel,West
+Asia,Japan,East
+Asia,Jordan,West
+Asia,Kazakhstan,Central
+Asia,Kuwait,West
+Asia,Kyrgyzstan,Central
+Asia,Malaysia,Southeast
+Asia,Maldives,South
+Asia,Mongolia,East
+Asia,Myanmar,Southeast
+Asia,Nepal,South
+Asia,Korea - Democratic People's Republic of,East
+Asia,Oman,West
+Asia,Pakistan,South
+Asia,Philippines,Southeast
+Asia,Qatar,West
+Europe,Russian Federation,East
+Asia,Saudi Arabia,West
+Asia,Singapore,Southeast
+Asia,Korea - Republic of,East
+Asia,Sri Lanka,South
+Asia,Syrian Arab Republic,West
+Asia,Taiwan,East
+Asia,Tajikistan,Central
+Asia,Thailand,Southeast
+Asia,Timor-Leste,Southeast
+Asia,Turkey,West
+Asia,Turkmenistan,Central
+Asia,United Arab Emirates,West
+Asia,Viet Nam,Southeast
+Asia,Yemen,West
+Asia,Hong Kong,East
+Asia,Lao People's Democratic Republic,Southeast
+Asia,Macao,East
+Asia,Armenia,West
+Asia,Uzbekistan,Central
+,,
+Europe,Albania,South
+Europe,Andorra,South
+Europe,Austria,West
+Europe,Belarus,East
+Europe,Belgium,West
+Europe,Bosnia and Herzegovina,South
+Europe,Bulgaria,East
+Europe,Croatia,South
+Europe,Cyprus,South
+Europe,Czech Republic,East
+Europe,Denmark,North
+Europe,Estonia,North
+Europe,Finland,North
+Europe,France,West
+Asia,Georgia,West
+Europe,Germany,West
+Europe,Greece,South
+Europe,Hungary,East
+Europe,Iceland,North
+Europe,Ireland,North
+Europe,Italy,South
+Europe,Latvia,North
+Asia,Lebanon,West
+Europe,Liechtenstein,West
+Europe,Lithuania,North
+Europe,Luxembourg,West
+Europe,Malta,South
+Europe,Moldova - Republic of,East
+Europe,Monaco,West
+Europe,Montenegro,South
+Europe,Netherlands,West
+Europe,Macedonia - the former Yugoslav Republic of,South
+Europe,Norway,North
+Asia,Palestine - State of,West
+Europe,Poland,East
+Europe,Portugal,West
+Europe,Romania,East
+Europe,San Marino,South
+Europe,Serbia,South
+Europe,Slovakia,East
+Europe,Slovenia,South
+Europe,Spain,West
+Europe,Sweden,North
+Europe,Switzerland,West
+Europe,Ukraine,East
+Europe,United Kingdom,North
+Europe,Holy See (Vatican City State),South
+Europe,Åland Islands,
+Europe,Faroe Islands,North
+Europe,Gibraltar,West
+Europe,Greenland,North
+Europe,Guernsey,
+Europe,Isle of Man,North
+Europe,Jersey,
+Oceania,Guam,
+Oceania,Fiji,
+Oceania,Kiribati,
+Oceania,Micronesia - Federated States of,
+Oceania,Papua New Guinea,
+Oceania,Tonga,
 Oceania,Australia,
 Oceania,Marshall Islands,
 Oceania,Nauru,
@@ -192,56 +227,22 @@ Oceania,Samoa,
 Oceania,Solomon Islands,
 Oceania,Tuvalu,
 Oceania,Vanuatu,
-Europe,Åland Islands,
 Oceania,American Samoa,
-Americas,Anguilla,
-Americas,Aruba,
-Americas,Bermuda,
-Americas,Bonaire - Sint Eustatius and Saba,
-Americas,Bouvet Island,
 Oceania,British Indian Ocean Territory,
-Americas,Cayman Islands,
 Oceania,Christmas Island,
 Oceania,Cocos (Keeling) Islands,
 Oceania,Cook Islands,
-Africa,Côte d'Ivoire,
-Americas,Curaçao,
-Americas,Falkland Islands (Malvinas),
-Europe,Faroe Islands,
-Americas,French Guiana,
 Oceania,French Polynesia,
-Oceania,French Southern Territories,
-Europe,Gibraltar,
-Europe,Greenland,
-Americas,Guadeloupe,
-Americas,Guam,
-Europe,Guernsey,
+Africa,French Southern Territories,East
 Oceania,Heard Island and McDonald Islands,
-Asia,Hong Kong,
-Asia,Lao People's Democratic Republic,
-Asia,Macao,
-Americas,Martinique,
-Oceania,Mayotte,
-Americas,Montserrat,
+Africa,Mayotte,East
 Oceania,Niue,
 Oceania,Norfolk Island,
 Oceania,Northern Mariana Islands,
 Oceania,Pitcairn,
-Americas,Puerto Rico,
-Oceania,Réunion,
-Americas,Saint Barthélemy,
-Americas,Saint Helena - Ascension and Tristan da Cunha,
-Americas,Saint Pierre and Miquelon,
-Africa,Swaziland,
-Americas,Virgin Islands - British,
-Americas,Virgin Islands - U.S.,
+Africa,Réunion,East
 Oceania,Tokelau,
 Oceania,Wallis and Futuna,
 Oceania,United States Minor Outlying Islands,
-Americas,Saint Martin (French part),
-Americas,Sint Maarten (Dutch part),
 Oceania,South Georgia and the South Sandwich Islands,
-Americas,Turks and Caicos Islands,
-Europe,Isle of Man,
-Europe,Jersey,
 Oceania,New Caledonia,
