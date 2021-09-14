@@ -1,15 +1,15 @@
 <template>
   <div id="app">
     <div>Your unlocked flags</div>
-    <MyFlags :subregionCountries="unlockedSubregionCountries" />
+    <!-- <MyFlags :subregionCountries="unlockedSubregionCountries" /> -->
 
     <div>Review button</div>
 
     <div>You can(not) unlock new flags! Unlock new flags button</div>
 
-    <!-- <LearnFlagsComponent :countries="subregionCountries[0].countries" />
+    <!-- <LearnFlagsComponent :countries="subregionCountries[0].countries" /> -->
 
-    <QuizComponent :questions="quizQuestions" :flagFirst="true" /> -->
+    <QuizComponent :questions="quizQuestions" :flagFirst="true" />
   </div>
 </template>
 
@@ -79,6 +79,17 @@ quiz options...
 
 Some fun message that you can unlock new flags. :)
 
+
+
+TODOS:
+- [ ] Add regions, put subregions under them in MyFlags
+- [ ] Put "learn flags" and "test" behind buttons, and in modals
+- [ ] Wire up tracking of answers
+- [ ] Build out view of MyFlags (flag cards, gray out locked countries and subregions and regions)
+- [ ] test quiz generation logic for subregions and regions
+- [ ] add logic for "can unlock new flags" and "can unlock new regions" (latter should be very easy)
+- [ ] add messaging/feedback for "can't unlock yet" (expose more quiz buttons for each? only show one at time?)
+- [ ] clarify quiz params.. flagfirst, pool (easy...), number?
 */
 
 const stub = (str) => {
@@ -104,28 +115,52 @@ const getRandom = (min, max) => {
 // Just returns array of arrays of answers. Each question is just that array of answers.
 // The "isCorrect" one will let you build the markup for the quiz question.
 // This structure should let either a flag-first OR a country-first quiz consume this..
-const generateQuiz = (pool: any[], maxNum: number) => {
-  const indices = [];
-  const targetLen = Math.min(pool.length, maxNum);
-  while (indices.length < targetLen) {
-    const r = getRandom(0, pool.length);
-    if (!indices.includes(r)) {
-      indices.push(r);
-    }
-  }
-  const result = indices.map((i) => {
-    const c = pool[i];
-    const answers = [{ name: c.name, flag: c.flag, isCorrect: true }];
-    const wrongAnswerIndices = [];
-    while (wrongAnswerIndices.length < 3) {
-      const x = getRandom(0, pool.length);
-      if (!wrongAnswerIndices.includes(x) && x !== i) {
-        wrongAnswerIndices.push(x);
+
+// "Pool" will be e.g. all once-seen countries,
+// or all subregion countries that are unlocked, or region countries that are unlocked
+// maxNum will almost always be 5 (??)
+// "Pool" represents possible ANSWERS
+// The list of questions will come from there, AS WELL AS ALL POSSIBLE ANSWERS
+
+// Issue: what about when we know what quiz is on - e.g. just unlocked - but possible answers are more?
+// Optional parameter: list of "pre-picked" questions, I guess
+
+// One wrinkle: add to pool if countryFirst (because random flags are good and cool)
+const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
+  let indices = [];
+  if (pickedIndices.length > 0) {
+    indices = pickedIndices;
+  } else {
+    const targetLen = Math.min(pool.length, maxNum);
+    while (indices.length < targetLen) {
+      const r = getRandom(0, pool.length);
+      if (!indices.includes(r)) {
+        indices.push(r);
       }
     }
+  }
+  // console.log("indices", indices);
+
+  const result = indices.map((i, j) => {
+    const c = pool[i];
+    const answers = [{ name: c.name, flag: c.flag, isCorrect: true }];
+    let wrongAnswerIndices = [];
+
+    if (pool.length < 4) {
+      wrongAnswerIndices = indices.slice(0);
+      wrongAnswerIndices.splice(j, 1);
+    } else {
+      while (wrongAnswerIndices.length < 3) {
+        const x = getRandom(0, pool.length);
+        if (!wrongAnswerIndices.includes(x) && x !== i) {
+          wrongAnswerIndices.push(x);
+        }
+      }
+    }
+
     // add 3 wrong answers
-    wrongAnswerIndices.forEach((j) => {
-      const c = pool[j];
+    wrongAnswerIndices.forEach((k) => {
+      const c = pool[k];
       const wrongAnswer = { name: c.name, flag: c.flag, isCorrect: false };
       answers.push(wrongAnswer);
     });
@@ -249,6 +284,7 @@ export default class App extends Vue {
     });
   }
 
+  // for MyFlags to consume
   get unlockedSubregionCountries() {
     return this.subregionCountries.map((region) => {
       return Object.assign({}, region, { countries: region.countries.filter((c) => c.isUnlocked) });
@@ -291,8 +327,9 @@ export default class App extends Vue {
         console.log("all", allSubregions, this.subregionCountries);
       });
       // console.log("QUIZ", generateQuiz(this.countries, 5));
-      // const quiz = generateQuiz(this.countries, 5);
-      // this.quizQuestions = quiz;
+      const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
+      console.log("Quiz", quiz, this.subregionCountries[0].countries);
+      this.quizQuestions = quiz;
     });
   }
 }
