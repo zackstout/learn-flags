@@ -9,13 +9,19 @@
         <!-- <h4>Total: {{ subregion.countries.length }}</h4> -->
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
-          <div>
-            <button :disabled="unlockFlagsDisabled(subregion).value" @click="unlockFlags(subregion)">
-              Unlock flags
-            </button>
-            <div style="color:red;">{{ unlockFlagsDisabled(subregion).message }}</div>
+          <div style="display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center;">
+              <button
+                :disabled="unlockFlagsDisabled(subregion).value"
+                @click="unlockFlags(subregion)"
+                style="background-color: rgb(59, 130, 246); width:8rem;"
+              >
+                Unlock Flags
+              </button>
+              <div style="color:gray; margin-left:1rem;">{{ unlockFlagsDisabled(subregion).message }}</div>
+            </div>
 
-            <button @click="takeQuiz(subregion)">
+            <button @click="takeQuiz(subregion)" style="width:8rem;">
               Review
             </button>
           </div>
@@ -68,7 +74,7 @@
           <span>Subregion locked.</span>
           <button
             :disabled="unlockSubregionDisabled(subregion)"
-            style="margin-left:1rem;"
+            style="margin-left:1rem; background-color:gold;"
             @click="unlockSubregion(subregion)"
           >
             Unlock subregion
@@ -171,14 +177,10 @@ const UNLOCK_COUNTRIES_RULES = {
 
 export const NEW_FLAGS_AMOUNT = 3;
 
-// - [ ] TODO: Unlock subregions not working.....?
-// Oh no it is. We let  you unlock new continents for free right now.
+// - [ ] TODO: show number of unlocked flags out of total for each subregion
 
-// - [ ] TODO: show flags against a background color??
-
-// - [ ] TODO: show number of unnlocked flags out of total for each subregion
-
-// - [ ] TODO: add tailwind
+// - [ ] TODO: add tailwind --  just do when....
+// - [ ] TODO : add vuex. HOPEFULLY deal with nested/reactivity issue
 
 // - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
 
@@ -192,16 +194,16 @@ export const NEW_FLAGS_AMOUNT = 3;
 
 // - [ ] TODO: Sort countries within subregion in MyFlags by whether isUnlocked
 
-// - [ ] TODO: show indicator that flag image is loading
+// - [ ] TODO: show indicator that flag image is loading (or maybe it was just broken in non-dev view)
 
+// - [ ] TODO: show flags against a background color??
 // - [ ] TODO: Bigger flag in quiz, fix background color....somehow
 
 // - [ ] TODO: swap answers! lol
 
 // - [ ] TODO: visual indicatioin of wrong answer
 
-// - [ ] TODO: indication that you can unlock flags?
-
+// - [ ] TODO: indication that you can unlock flags? after you review enough
 // - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
 
 // - [ ] TODO: from game perspective, there should be motivev to review flags from subregion yu have unlocked all flags for
@@ -227,6 +229,15 @@ export const NEW_FLAGS_AMOUNT = 3;
 // - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
 
 // - [ ] TODO: subregions, and prob regions should be Accordions.
+
+// - [ ] TODO: flags do not show up in quiz in non-dev view
+
+// - [ ] TODO: think about quiz params -- flagFirst??
+
+// - [ ] TODO: main text could be smalller....toggle for size somewhere?
+
+// - [ ] TODO: Unlock subregions not working.....?
+// Oh no it is. We let  you unlock new continents for free right now.
 
 @Component({
   components: {},
@@ -358,6 +369,8 @@ export default class MyFlagsComponent extends Vue {
   // Only let user unlock new subregion in region
   // IF every subregion in the region that has any unlocked countries has ALL unlocked countries
   // How to determine whether they can start a new continent? Maybe just let them? That's current behavior
+  // i.e. It's disabled if it's  not the case that every subregion in the region with some unlocked has every locked.
+  // i.e. Disabled if there exists a subregion in the region with countries unlocked but Not All countries unlocked.
   unlockSubregionDisabled(subregion: string) {
     const region = REGIONS.find((r) => r.subregions.includes(subregion));
     return !region.subregions
@@ -424,11 +437,6 @@ export default class MyFlagsComponent extends Vue {
 }
 
 .country {
-  margin: 2rem;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  margin: 0 2rem 2rem 0;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div style="font-style:italic; display:flex; flex-direction:column; font-size:1rem;" v-html="welcomeHtml"></div>
+    <div class="welcome" v-html="welcomeHtml"></div>
 
     <MyFlags
       :subregionCountries="subregionCountries"
@@ -113,13 +113,15 @@ Quiz stuff:
 
 // ==================================================
 
-const WELCOME_HTML = `<ul><li>Welcome! It looks like you have not yet begun <b>learning the flags of the world</b> with us. No time like the present!!</li>
+const WELCOME_HTML = `<ul><li>Welcome! It looks like you have not yet begun learning the <b>Flags</b> of the world with us. Today is a wonderful day to begin!</li>
 
-<li>You are always free to unlock the first Subregion of a Region.</li>
+<li>There are five <b>Regions</b>: Asia, Africa, Europe, Americas, and Oceania. Each is comprised of <b>Subregions</b>.</li>
 
-<li>After doing so, you will be asked to <b>complete tasks</b> before you can unlock more flags within that Subregion, or more Subregions within that Region.</li>
+<li>You are always free to unlock the first <b>Subregion</b> of a <b>Region</b>.</li>
 
-<li><b>Review flags to gain XP points and advance!</b> Good luck and have fun!</li></ul>`;
+<li>After doing so, you will be asked to <u>complete tasks</u> before you can unlock more <b>Flags</b> within that <b>Subregion</b>, or more <b>Subregions</b> within that <b>Region.</b></li>
+
+<li><u>Review <b>Flags</b> to gain XP points and advance!</u> Good luck and have fun!</li></ul>`;
 
 const firebaseConfig = {
   apiKey: "AIzaSyBDhXVtVZwURQEtUPsdleJp6XEUulRZC-Y",
@@ -277,8 +279,8 @@ export default class App extends Vue {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  margin-top: 60px;
   font-size: 2rem;
+  padding: 2rem;
 }
 
 img {
@@ -298,9 +300,24 @@ img {
 } */
 
 button {
-  font-size: 1.25rem;
-  padding: 0.5rem;
-  margin: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.4rem;
+  margin: 0.5rem 0;
+  border-radius: 0.2rem;
+  appearance: none;
+  background: rgb(16, 185, 129);
+  color: white;
+  cursor: pointer;
+  border: none;
+}
+
+button:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 .modal {
@@ -331,5 +348,16 @@ button {
   background: white;
   padding: 2rem;
   z-index: 50;
+}
+
+.welcome {
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+}
+
+.welcome li {
+  margin: 1rem 0;
 }
 </style>
