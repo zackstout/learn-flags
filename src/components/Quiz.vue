@@ -55,7 +55,7 @@ export default class QuizComponent extends Vue {
     (this.$refs.inner as HTMLElement).addEventListener("mousedown", (ev: any) => ev.stopPropagation());
   }
 
-  get currentQuestion() {
+  get currentQuestion(): QuizAnswer[] {
     return this.questions.length > 0 ? this.questions[this.questionIndex] : [];
   }
 
@@ -67,13 +67,18 @@ export default class QuizComponent extends Vue {
     // - [ ] TODO: Handle right/wrong .... maybe gray out tried & wrong answers?
     // Just give some feedback.
 
-    const name = stub(answer.name);
-    // console.log("answer...", answer, answer.isUnlocked);
+    // OHO!  We don't update ANSWER's data, but QUESTION'S........
+
+    // TODO: this not really working......
+
+    const questionCountry = this.currentQuestion.find((x) => x.isCorrect);
+    const name = stub(questionCountry.name);
+    console.log(questionCountry.numAttempts, name);
     const info = {
-      isUnlocked: answer.isUnlocked,
-      lastReviewed: answer.lastReviewed,
-      numAttempts: answer.numAttempts,
-      numCorrect: answer.numCorrect,
+      isUnlocked: questionCountry.isUnlocked,
+      lastReviewed: questionCountry.lastReviewed,
+      numAttempts: questionCountry.numAttempts,
+      numCorrect: questionCountry.numCorrect,
     };
 
     if (answer.isCorrect) {
@@ -83,7 +88,8 @@ export default class QuizComponent extends Vue {
         // Not yet last one
         this.questionIndex += 1;
       } else {
-        // Last one -- must close out the quiz
+        // Last one --
+        // TODO: must close out the quiz
         console.log("done!");
       }
     }

@@ -73,8 +73,8 @@ Some fun message that you can unlock new flags. :)
 
 TODOS:
 - [x] Add regions, put subregions under them in MyFlags
-- [ ] Put "learn flags" and "test" behind buttons, and in modals
-- [ ] Wire up tracking of answers
+- [x] Put "learn flags" and "test" behind buttons, and in modals
+- [x-ish] Wire up tracking of answers
 - [x] Build out view of MyFlags (flag cards, gray out locked countries and subregions and regions)
 - [x] test quiz generation logic for subregions and regions
 - [x] add logic for "can unlock new flags" and "can unlock new regions" (latter should be very easy)
@@ -83,6 +83,7 @@ TODOS:
 - [ ] (expose more quiz buttons for each? only show one at time?)
 - [ ] clarify quiz params.. flagfirst, pool (easy...), number? Just choose at random?
 - [ ] would like it to LOOK/FEEL good!
+- [ ] just setup vuex state
 
 
 Quiz stuff:
@@ -186,6 +187,8 @@ export default class App extends Vue {
         name: subregion.name,
         countries: subregion.values.map((country) => {
           let c = this.databaseCountries.find((c) => unstub(c.name) === country.name);
+
+          // Try to get around "no reactivity if adding props" issue -- justuse vuex state
           if (!c) {
             c = {
               isUnlocked: false,
@@ -213,9 +216,18 @@ export default class App extends Vue {
     onValue(ref(db, "countries"), (snapshot) => {
       const data = snapshot.val();
 
+      console.log("snapshot"); // only called on first answer click....
+
       // This *should* "just work" ... and cause subregionCountries to update
+      // I think this is causing "only respond to first answer click" issue....
+      // No, this just stops being called....
+      // And the reason is that the data in firebase is not actually updating. Makes sense.
+      // So issue could be here....it's not actually reacting to first real change to DB.
+
+      // - [ ] TODO: It MIGHT fix things if we have a row in database for each country..
       this.databaseCountries = Object.keys(data).map((name) => {
-        return Object.assign({}, { name }, data[name]);
+        // console.log(data[name].numAttempts);
+        return { name, ...data[name] };
       });
     });
 
@@ -237,11 +249,10 @@ export default class App extends Vue {
         return { name, values: allSubregions[name] };
       });
 
-      // console.log("QUIZ", generateQuiz(this.countries, 5));
+      // ==================
+      // TESTING:
       // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
-      // console.log("Quiz", quiz, this.subregionCountries[0].countries.slice(0));
       // this.quizQuestions = quiz;
-
       // this.newFlags = this.subregionCountries[0].countries;
     });
   }

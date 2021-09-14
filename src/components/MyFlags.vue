@@ -43,7 +43,16 @@
             </div>
           </div>
         </div>
-        <div v-else>Subregion locked. <button :disabled="unlockSubregionDisabled(subregion)">Unlock</button></div>
+        <div v-else>
+          <span>Subregion locked.</span>
+          <button
+            :disabled="unlockSubregionDisabled(subregion)"
+            style="margin-left:1rem;"
+            @click="unlockSubregion(subregion)"
+          >
+            Unlock subregion
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -132,6 +141,8 @@ const REGIONS = [
 
 // First element in NUMBER_REVIEWS means have 0-2 unlocked, need 0 successes
 // Second means have 3-5 unlocked, need 6 successes to unlock more
+
+// Definitely tinker -- a lot of subregions have less than 15 flags
 const UNLOCK_COUNTRIES_RULES = {
   NUMBER_REVIEWS: [0, 6, 15, 25, 40, 60, 80, 100, 120, 160, 200],
   LEVEL_OF_COMPETENCE: [0, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6],
@@ -156,13 +167,13 @@ export default class MyFlagsComponent extends Vue {
   }
 
   takeQuiz(subregion: string) {
-    // console.log("quiz", subregion);
     const unlockedCountries = this.getCountries(subregion).filter((c) => c.isUnlocked);
     const quiz = generateQuiz(unlockedCountries, 5);
-    // console.log("make quiz", quiz);
     this.$emit("quizQuestions", quiz);
-    //   console.log("Quiz", quiz, this.subregionCountries[0].countries.slice(0));
-    //   this.quizQuestions = quiz;
+  }
+
+  unlockSubregion(subregion: string) {
+    this.unlockFlags(subregion);
   }
 
   unlockFlags(subregion: string) {
@@ -186,7 +197,6 @@ export default class MyFlagsComponent extends Vue {
         numAttempts: country.numAttempts,
         numCorrect: country.numCorrect,
       };
-      // console.log("new flag", country);
 
       // THIS WORKED
       const name = stub(country.name);
@@ -206,7 +216,9 @@ export default class MyFlagsComponent extends Vue {
 
     if (!this.hasEnoughSuccesses(countries)) {
       return {
-        message: `You need ${this.numNeededSuccesses(countries)} successful reviews in this subregion.`,
+        message: `You need ${this.numNeededSuccesses(
+          countries
+        )} successful reviews in this subregion. You have accrued ${this.numSuccesses(countries)}.`,
         value: true,
       };
     }
@@ -240,19 +252,22 @@ export default class MyFlagsComponent extends Vue {
     return ruleIndex;
   }
 
-  levelNeeded(countries) {
-    const ruleIndex = this.getRuleIndex(countries);
-    return UNLOCK_COUNTRIES_RULES.LEVEL_OF_COMPETENCE[ruleIndex];
-  }
-
   numNeededSuccesses(countries) {
     const ruleIndex = this.getRuleIndex(countries);
     return UNLOCK_COUNTRIES_RULES.NUMBER_REVIEWS[ruleIndex];
   }
 
+  numSuccesses(countries) {
+    return countries.reduce((acc, country) => acc + country.numCorrect, 0);
+  }
+
   hasEnoughSuccesses(countries) {
-    const count = countries.reduce((acc, country) => acc + country.numCorrect, 0);
-    return count >= this.numNeededSuccesses(countries);
+    return this.numSuccesses(countries) >= this.numNeededSuccesses(countries);
+  }
+
+  levelNeeded(countries) {
+    const ruleIndex = this.getRuleIndex(countries);
+    return UNLOCK_COUNTRIES_RULES.LEVEL_OF_COMPETENCE[ruleIndex];
   }
 
   hasBeenReviewedToLevel(countries, level) {
