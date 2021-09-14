@@ -1,15 +1,11 @@
 <template>
   <div id="app">
     <div>Your unlocked flags</div>
-    <!-- <MyFlags :subregionCountries="unlockedSubregionCountries" /> -->
-
-    <div>Review button</div>
-
-    <div>You can(not) unlock new flags! Unlock new flags button</div>
+    <MyFlags :subregionCountries="subregionCountries" />
 
     <!-- <LearnFlagsComponent :countries="subregionCountries[0].countries" /> -->
 
-    <QuizComponent :questions="quizQuestions" :flagFirst="true" />
+    <!-- <QuizComponent :questions="quizQuestions" :flagFirst="true" :db="db" /> -->
   </div>
 </template>
 
@@ -82,21 +78,22 @@ Some fun message that you can unlock new flags. :)
 
 
 TODOS:
-- [ ] Add regions, put subregions under them in MyFlags
+- [x] Add regions, put subregions under them in MyFlags
 - [ ] Put "learn flags" and "test" behind buttons, and in modals
 - [ ] Wire up tracking of answers
-- [ ] Build out view of MyFlags (flag cards, gray out locked countries and subregions and regions)
-- [ ] test quiz generation logic for subregions and regions
+- [x] Build out view of MyFlags (flag cards, gray out locked countries and subregions and regions)
+- [x] test quiz generation logic for subregions and regions
 - [ ] add logic for "can unlock new flags" and "can unlock new regions" (latter should be very easy)
 - [ ] add messaging/feedback for "can't unlock yet" (expose more quiz buttons for each? only show one at time?)
 - [ ] clarify quiz params.. flagfirst, pool (easy...), number?
+- [ ] would like it to LOOK/FEEL good!
 */
 
-const stub = (str) => {
+export const stub = (str) => {
   return str.replace(/\s/g, "_").replace(/\./g, "%");
 };
 
-const unstub = (str) => {
+export const unstub = (str) => {
   return str.replace(/_/g, " ").replace(/%/g, ".");
 };
 
@@ -139,7 +136,6 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
       }
     }
   }
-  // console.log("indices", indices);
 
   const result = indices.map((i, j) => {
     const c = pool[i];
@@ -171,32 +167,6 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
   return result;
 };
 
-// first item means after they have 3 unlocked, they need this amount of reviews (or successes?) to unlock more
-// second item means after they have 6, they need this amount.
-// third item means after 9...
-// Go up my multiples of NEW_FLAGS_AMOUNT
-// issue is....this doesn't check if they are REREVIEWING new stuff too.
-// i.e. user could just review first 3 flags indefinite times to break this.
-
-// so we'll also check that each (or most) have been reviewed x times.
-// could add another array of like....the level that 75% of flags must be at? before moving on?
-
-// Must have reviewed X number in past however long duration?
-
-// Must NOT  have any that have  NOT been reviwed for some duration?
-
-// You'll want to tinker with  this.....because MAIN GOAL FOR THIS APP
-// is to ensure that I am forced to review things thoroughly before going on to grab more to learn.
-// The POINT is gatekeeping and game-ifying the whole "unlocking new flags" process.
-// FORCING review first.
-
-const UNLOCK_COUNTRIES_RULES = {
-  NUMBER_REVIEWS: [6, 15, 25, 40, 60, 80, 100, 120, 160, 200],
-  LEVEL_OF_COMPETENCE: [],
-};
-
-const UNLOCK_SUBREGIONS_RULES = {};
-
 @Component({
   components: {
     QuizComponent,
@@ -205,11 +175,9 @@ const UNLOCK_SUBREGIONS_RULES = {};
   },
 })
 export default class App extends Vue {
-  // countries: any[] = [];
   allSubregions = [];
   db: any;
   databaseCountries: any = [];
-
   quizQuestions: any[] = [];
 
   // - [ ] TODO: subregion could be a class, with all methods on there
@@ -349,7 +317,7 @@ export default class App extends Vue {
 img {
   max-height: 3.5rem;
 }
-
+/* 
 .region {
   margin: 3rem 0;
 }
@@ -360,5 +328,5 @@ img {
   flex-wrap: wrap;
   max-height: 50vh;
   margin: 2rem 0;
-}
+} */
 </style>

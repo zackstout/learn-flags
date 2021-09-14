@@ -23,6 +23,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { stub } from "@/App.vue";
+import { getDatabase, ref, set } from "firebase/database";
 
 // TODO: Use a modal
 
@@ -40,6 +42,7 @@ interface QuizAnswer {
 export default class QuizComponent extends Vue {
   @Prop({ default: true }) readonly flagFirst: boolean;
   @Prop() readonly questions: QuizAnswer[][];
+  @Prop() db: any;
   questionIndex = 0;
   answeredWrong = false; // controls whether "try again" modal/message shows
 
@@ -57,6 +60,19 @@ export default class QuizComponent extends Vue {
 
   answerClick(answer: QuizAnswer) {
     // - [ ] TODO: Handle right/wrong .... maybe gray out tried & wrong answers?
+    const stubbedName = stub(answer.name);
+
+    // TODO: Gonna have to  clone current value, merge in new property value.
+    // Pull in all subregionCountries for app?
+    // Really a case for State.....
+    // Is intention for this.questions to be reactive? Shouldn't need to be....
+
+    // set(ref(this.db, `countries/${stubbedName}`), {
+    //   lastReviewed: Date.now(),
+    //   isUnlocked: false,
+    //   numAttempts: 0,
+    //   numCorrect: 0,
+    // });
 
     if (answer.isCorrect) {
       if (this.questionIndex < this.questions.length - 1) {
