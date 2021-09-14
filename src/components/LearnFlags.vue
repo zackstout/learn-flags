@@ -30,6 +30,8 @@ interface Country {
   flag: string;
 }
 
+// TODO: Should be "take quiz" immediately from this view button.
+
 @Component({
   components: {},
 })

@@ -1,40 +1,15 @@
 <template>
   <div id="app">
-    <!-- <div v-for="region in allSubregions" :key="region.name" class="region">
-      <div>{{ region.name }}</div>
-      <h4>Total: {{ region.values.length }}</h4>
-
-      <div class="countries-container">
-        <div v-for="country in region.values" :key="country.name">
-          <div>{{ country.name }}</div>
-          <div>{{ country.capital }}</div>
-          <div>{{ country.population }}</div>
-          <div>{{ country.alpha3Code }}</div>
-
-          <div
-            :style="{
-              backgroundImage: 'url(' + country.flag + ')',
-              backgroundColor: 'gray',
-              width: '300px',
-              height: '200px',
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-            }"
-          ></div>
-        </div>
-      </div>
-    </div> -->
-
     <div>Your unlocked flags</div>
+    <MyFlags :subregionCountries="unlockedSubregionCountries" />
 
     <div>Review button</div>
 
     <div>You can(not) unlock new flags! Unlock new flags button</div>
 
-    <LearnFlagsComponent :countries="countries" />
+    <!-- <LearnFlagsComponent :countries="subregionCountries[0].countries" />
 
-    <QuizComponent :questions="quizQuestions" :flagFirst="true" />
+    <QuizComponent :questions="quizQuestions" :flagFirst="true" /> -->
   </div>
 </template>
 
@@ -46,6 +21,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import QuizComponent from "@/components/Quiz.vue";
 import LearnFlagsComponent from "@/components/LearnFlags.vue";
+import MyFlags from "@/components/MyFlags.vue";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBDhXVtVZwURQEtUPsdleJp6XEUulRZC-Y",
@@ -60,13 +36,8 @@ const firebaseConfig = {
 
 /*
 = Should be "learning phase" for a flag (group).
-
 = Shouldn't be able to learn more than 3 new ones without having to review them before getting more.
-
 = This is main principle: force to review before move on to new.
-
-= DEFINITELY want to bring in maps with d3 -- highlight relevant regions/country/countries
-
 
 1. Unlock system for subregions
 
@@ -96,40 +67,19 @@ const firebaseConfig = {
 - show some kind of larger stats for region (maybe a different view though...)
 - show all info from API
 
-
 NOTE: To start can just focus on subregions, don't worry about grouping into larger regions.
-
 
 7. a MAP!
 - could be sick
-
-
-
-So  maybe for components...just need....
-
-- Learn new flags (carousel)
-- Quiz (flag-first or country-first, array of stuff -- or it could be in charge of making own list)
-
 
 quiz options...
 - all of level x (i.e i've seen it x times)
 - all of subregion
 - all! (either all all, or random of certain number)
 
-
 Some fun message that you can unlock new flags. :)
 
-
-
 */
-
-// const REGIONS = ["Asia", "Americas", "Europe", "Oceania", "Africa"];
-// const SUBREGIONS = {
-//   Asia: ["Central", "East", "West", "South", "Southeast"],
-//   Americas: ["South America", "Central America", "Caribbean"],
-//   Africa: ["Central", "East", "West", "South", "North"],
-//   Europe: ["East", "West", "South", "North"],
-// };
 
 const stub = (str) => {
   return str.replace(/\s/g, "_").replace(/\./g, "%");
@@ -141,20 +91,15 @@ const unstub = (str) => {
 
 const NEW_FLAGS_AMOUNT = 3;
 
-// returns array of questions, each of which is
-// EITHER a flag, and four countries
-// OR a country, and four flags
-// with some indication which answer is correct
-// Goal is to generate a data structure that can be passed into Quiz component
-// NOTE: this may need  to take in MORE than just pool (of quiz questions), to generate  answers
-// Maybe to start...Just pull from all countries/flags?
-// OOOOH but then it's too easy, because if quiz is scoped to Subregion....they can eliminate too many....
-// If possible only pull in ones you've seen???
-
 // DOESN'T INCLUDE MAX
 const getRandom = (min, max) => {
   return min + Math.floor(Math.random() * (max - min));
 };
+
+// NOTE: this may need  to take in MORE than just pool (of quiz questions), to generate  answers
+// Maybe to start...Just pull from all countries/flags?
+// OOOOH but then it's too easy, because if quiz is scoped to Subregion....they can eliminate too many....
+// If possible only pull in ones you've seen???
 
 // Just returns array of arrays of answers. Each question is just that array of answers.
 // The "isCorrect" one will let you build the markup for the quiz question.
@@ -197,8 +142,19 @@ const generateQuiz = (pool: any[], maxNum: number) => {
 // Go up my multiples of NEW_FLAGS_AMOUNT
 // issue is....this doesn't check if they are REREVIEWING new stuff too.
 // i.e. user could just review first 3 flags indefinite times to break this.
-// so we'll also check that each (or most)  have been reviewed x times.
+
+// so we'll also check that each (or most) have been reviewed x times.
 // could add another array of like....the level that 75% of flags must be at? before moving on?
+
+// Must have reviewed X number in past however long duration?
+
+// Must NOT  have any that have  NOT been reviwed for some duration?
+
+// You'll want to tinker with  this.....because MAIN GOAL FOR THIS APP
+// is to ensure that I am forced to review things thoroughly before going on to grab more to learn.
+// The POINT is gatekeeping and game-ifying the whole "unlocking new flags" process.
+// FORCING review first.
+
 const UNLOCK_COUNTRIES_RULES = {
   NUMBER_REVIEWS: [6, 15, 25, 40, 60, 80, 100, 120, 160, 200],
   LEVEL_OF_COMPETENCE: [],
@@ -207,13 +163,17 @@ const UNLOCK_COUNTRIES_RULES = {
 const UNLOCK_SUBREGIONS_RULES = {};
 
 @Component({
-  components: { QuizComponent, LearnFlagsComponent },
+  components: {
+    QuizComponent,
+    LearnFlagsComponent,
+    MyFlags,
+  },
 })
 export default class App extends Vue {
-  countries: any[] = [];
+  // countries: any[] = [];
   allSubregions = [];
   db: any;
-  databaseCountries: any = {};
+  databaseCountries: any = [];
 
   quizQuestions: any[] = [];
 
@@ -240,11 +200,20 @@ export default class App extends Vue {
     // Should sum how many times each country/flag in the subregion has been reviewed
   }
 
+  // OOOOk confusion is that data is coming from 2 sources, countries and databaseCountries.
+
+  // getCountries(subregion: string) {
+  //   return Object.keys(this.databaseCountries)
+  //     .map((name) => this.countries.find((c) => c.name === unstub(name)))
+  //     .filter((c) => c.subregion === subregion);
+  // }
+
   getLockedCountries(subregion: string) {
-    return Object.keys(this.databaseCountries).filter((name) => {
-      const country = this.countries.find((c) => c.name === unstub(name));
-      return !this.databaseCountries[name].isUnlocked && country.subregion === subregion;
-    });
+    // return Object.keys(this.databaseCountries).filter((name) => {
+    //   const country = this.countries.find((c) => c.name === unstub(name));
+    //   return !this.databaseCountries[name].isUnlocked && country.subregion === subregion;
+    // });
+    // return this.getCountries(subregion).filter(c=>!)
   }
 
   getUnlockedCountries(subregion: string) {
@@ -264,6 +233,28 @@ export default class App extends Vue {
     });
   }
 
+  // [x] Should merge together databaseCountries (info from DB) with allSubregions, which is API data
+  // [x] Should return array  of subregions, each of which has name and countries, which have merged data
+  // [x] Huh...not sure why change to databaseCountries doesn't trigger change here...Change to array?
+  get subregionCountries() {
+    return this.allSubregions.map((subregion) => {
+      return {
+        name: subregion.name,
+        countries: subregion.values.map((country) => {
+          const c = this.databaseCountries.find((c) => unstub(c.name) === country.name); // unstub??
+          // console.log("doc", country, c);
+          return Object.assign({}, country, c);
+        }),
+      };
+    });
+  }
+
+  get unlockedSubregionCountries() {
+    return this.subregionCountries.map((region) => {
+      return Object.assign({}, region, { countries: region.countries.filter((c) => c.isUnlocked) });
+    });
+  }
+
   mounted() {
     initializeApp(firebaseConfig);
     const db = getDatabase();
@@ -271,8 +262,12 @@ export default class App extends Vue {
 
     onValue(ref(db, "countries"), (snapshot) => {
       const data = snapshot.val();
-      this.databaseCountries = data;
-      console.log("locked", this.getLockedCountries("Southern Asia"));
+      this.databaseCountries = Object.keys(data).map((name) => {
+        return Object.assign({ name }, data[name]);
+      });
+      // console.log("dbc", this.databaseCountries);
+
+      // console.log("locked", this.getLockedCountries("Southern Asia"));
     });
 
     // Transform data for markup to consume:
@@ -287,14 +282,17 @@ export default class App extends Vue {
         // this.initData(row);
       });
 
-      this.countries = res.data;
+      // this.countries = res.data;
       this.allSubregions = Object.keys(allSubregions).map((name) => {
         return { name, values: allSubregions[name] };
       });
-      console.log("all", allSubregions);
+
+      this.$nextTick(() => {
+        console.log("all", allSubregions, this.subregionCountries);
+      });
       // console.log("QUIZ", generateQuiz(this.countries, 5));
-      const quiz = generateQuiz(this.countries, 5);
-      this.quizQuestions = quiz;
+      // const quiz = generateQuiz(this.countries, 5);
+      // this.quizQuestions = quiz;
     });
   }
 }

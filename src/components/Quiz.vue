@@ -48,7 +48,7 @@ export default class QuizComponent extends Vue {
   }
 
   get currentQuestion() {
-    return this.questions[this.questionIndex];
+    return this.questions.length > 0 ? this.questions[this.questionIndex] : [];
   }
 
   get currentCorrectAnswer() {
