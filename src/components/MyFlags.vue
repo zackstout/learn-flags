@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="font-size:1rem;">
     <div v-for="region in regions" :key="region.name" class="region">
       <h2>{{ region.name }}</h2>
 
@@ -22,21 +22,42 @@
 
           <div class="countries-container">
             <div v-for="country in getCountries(subregion)" :key="country.name" class="country">
-              <div style="font-weight:bold;">{{ unstubInner(country.name) }}</div>
-              <div>{{ country.isUnlocked ? country.capital : "???" }}</div>
-              <div>{{ country.isUnlocked ? numberWithCommas(country.population) : "???" }}</div>
-              <div>{{ country.numCorrect }} / {{ country.numAttempts }}</div>
-              <!-- <div>{{ country.isUnlocked ? country.alpha3Code : "???" }}</div> -->
+              <div style="font-weight:bold; font-size:1.2rem;">{{ unstubInner(country.name) }}</div>
+              <div>
+                <div v-if="country.isUnlocked">
+                  <span style="font-weight:bold;">Capital:</span>&emsp;<span>{{ country.capital }}</span>
+                </div>
+                <div v-else>???</div>
+              </div>
+
+              <div>
+                <div v-if="country.isUnlocked">
+                  <span style="font-weight:bold;">Population:</span>&emsp;<span>{{
+                    numberWithCommas(country.population)
+                  }}</span>
+                </div>
+                <div v-else>???</div>
+              </div>
+
+              <div>
+                <div v-if="country.isUnlocked">
+                  <span style="font-weight:bold;">Score:</span>&emsp;<span
+                    >{{ country.numCorrect }} / {{ country.numAttempts }}</span
+                  >
+                </div>
+                <div v-else>???</div>
+              </div>
 
               <div
                 :style="{
                   backgroundImage: 'url(' + country.flag + ')',
                   backgroundColor: 'gray',
-                  width: '300px',
-                  height: '200px',
+                  width: '10vw',
+                  height: '10vh',
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
+                  marginTop: '10px',
                   opacity: country.isUnlocked ? '1' : '0.2', // or just gray out entirely? placeholder?
                 }"
               ></div>
@@ -150,6 +171,63 @@ const UNLOCK_COUNTRIES_RULES = {
 
 export const NEW_FLAGS_AMOUNT = 3;
 
+// - [ ] TODO: Unlock subregions not working.....?
+// Oh no it is. We let  you unlock new continents for free right now.
+
+// - [ ] TODO: show flags against a background color??
+
+// - [ ] TODO: show number of unnlocked flags out of total for each subregion
+
+// - [ ] TODO: add tailwind
+
+// - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
+
+// If looking for a detour -- get into Maps
+
+// - [ ] TODO: think about how to  let other people use. browser/ip or somethinng as ID?
+// Or just make an auth flow?
+// If you host on Heroku will the 10 seconds to load be annoying?
+// Can you deploy server-side with "now"??
+// just liike "enter your username"????
+
+// - [ ] TODO: Sort countries within subregion in MyFlags by whether isUnlocked
+
+// - [ ] TODO: show indicator that flag image is loading
+
+// - [ ] TODO: Bigger flag in quiz, fix background color....somehow
+
+// - [ ] TODO: swap answers! lol
+
+// - [ ] TODO: visual indicatioin of wrong answer
+
+// - [ ] TODO: indication that you can unlock flags?
+
+// - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
+
+// - [ ] TODO: from game perspective, there should be motivev to review flags from subregion yu have unlocked all flags for
+// Maybe you need to review all flags from  REGION within a day?
+
+// - [ ] TODO: button to "flag" a flag as "want extra review" -- then it puts in every quiz  from that subregion
+// Maybe a "i got it" button? to hide from quizzes?
+
+// - [ ] TODO: do not show Unlock flags button if have all flags!
+
+// - [ ] TODO: quiz for region button
+
+// - [ ] TODO: tinker with unlock rules params
+
+// - [ ] TODO: hide flag completely  if locked, not just opacity
+
+// - [ ] TODO: hover flag increases scale? not sure. Because, can you click it??
+
+// - [ ] TODO: re-imagine "numCorrect" as like...XP somehow? Just game-ify
+
+// - [ ] TODO: ensure stuff never overflows modals
+
+// - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
+
+// - [ ] TODO: subregions, and prob regions should be Accordions.
+
 @Component({
   components: {},
 })
@@ -218,7 +296,7 @@ export default class MyFlagsComponent extends Vue {
       return {
         message: `You need ${this.numNeededSuccesses(
           countries
-        )} successful reviews in this subregion. You have accrued ${this.numSuccesses(countries)}.`,
+        )} successful reviews in this subregion. You have accrued a scanty ${this.numSuccesses(countries)}.`,
         value: true,
       };
     }

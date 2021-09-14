@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+    <div style="font-style:italic; display:flex; flex-direction:column; font-size:1rem;" v-html="welcomeHtml"></div>
+
     <MyFlags
       :subregionCountries="subregionCountries"
       @newFlags="handleNewFlags"
@@ -111,6 +113,14 @@ Quiz stuff:
 
 // ==================================================
 
+const WELCOME_HTML = `<ul><li>Welcome! It looks like you have not yet begun <b>learning the flags of the world</b> with us. No time like the present!!</li>
+
+<li>You are always free to unlock the first Subregion of a Region.</li>
+
+<li>After doing so, you will be asked to <b>complete tasks</b> before you can unlock more flags within that Subregion, or more Subregions within that Region.</li>
+
+<li><b>Review flags to gain XP points and advance!</b> Good luck and have fun!</li></ul>`;
+
 const firebaseConfig = {
   apiKey: "AIzaSyBDhXVtVZwURQEtUPsdleJp6XEUulRZC-Y",
   authDomain: "flags-79ae1.firebaseapp.com",
@@ -144,6 +154,8 @@ export default class App extends Vue {
   allSubregions = [];
   db: any = null;
   databaseCountries: any = [];
+
+  welcomeHtml = WELCOME_HTML;
 
   // If this has membres, we should be showing quiz modal
   quizQuestions: any[] = [];
@@ -264,7 +276,6 @@ export default class App extends Vue {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
   font-size: 2rem;
@@ -287,8 +298,9 @@ img {
 } */
 
 button {
-  font-size: 2rem;
-  padding: 1rem;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
 }
 
 .modal {
