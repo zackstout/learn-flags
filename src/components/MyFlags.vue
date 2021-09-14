@@ -14,6 +14,10 @@
               Unlock flags
             </button>
             <div style="color:red;">{{ unlockFlagsDisabled(subregion).message }}</div>
+
+            <button @click="takeQuiz(subregion)">
+              Review
+            </button>
           </div>
 
           <div class="countries-container">
@@ -21,6 +25,7 @@
               <div style="font-weight:bold;">{{ unstubInner(country.name) }}</div>
               <div>{{ country.isUnlocked ? country.capital : "???" }}</div>
               <div>{{ country.isUnlocked ? numberWithCommas(country.population) : "???" }}</div>
+              <div>{{ country.numCorrect }} / {{ country.numAttempts }}</div>
               <!-- <div>{{ country.isUnlocked ? country.alpha3Code : "???" }}</div> -->
 
               <div
@@ -46,7 +51,52 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { getRandom, unstub } from "@/App.vue";
+import { getRandom, unstub, stub } from "@/App.vue";
+import { ref, set } from "firebase/database";
+
+const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
+  let indices = [];
+  if (pickedIndices.length > 0) {
+    indices = pickedIndices;
+  } else {
+    const targetLen = Math.min(pool.length, maxNum);
+    while (indices.length < targetLen) {
+      const r = getRandom(0, pool.length);
+      if (!indices.includes(r)) {
+        indices.push(r);
+      }
+    }
+  }
+
+  const result = indices.map((i, j) => {
+    const c = pool[i];
+    const answers = [Object.assign({}, c, { isCorrect: true })];
+    let wrongAnswerIndices = [];
+
+    if (pool.length < 4) {
+      wrongAnswerIndices = indices.slice(0);
+      wrongAnswerIndices.splice(j, 1);
+    } else {
+      while (wrongAnswerIndices.length < 3) {
+        const x = getRandom(0, pool.length);
+        if (!wrongAnswerIndices.includes(x) && x !== i) {
+          wrongAnswerIndices.push(x);
+        }
+      }
+    }
+
+    // add 3 wrong answers
+    wrongAnswerIndices.forEach((k) => {
+      const c = pool[k];
+      const wrongAnswer = Object.assign({}, c, { isCorrect: false });
+      answers.push(wrongAnswer);
+    });
+
+    return answers; // TODO: scramble them
+  });
+
+  return result;
+};
 
 const REGIONS = [
   {
@@ -94,6 +144,7 @@ export const NEW_FLAGS_AMOUNT = 3;
 })
 export default class MyFlagsComponent extends Vue {
   @Prop() readonly subregionCountries: any[];
+  @Prop() db: any;
   regions = REGIONS;
 
   numberWithCommas(x) {
@@ -104,8 +155,18 @@ export default class MyFlagsComponent extends Vue {
     return unstub(x);
   }
 
+  takeQuiz(subregion: string) {
+    // console.log("quiz", subregion);
+    const unlockedCountries = this.getCountries(subregion).filter((c) => c.isUnlocked);
+    const quiz = generateQuiz(unlockedCountries, 5);
+    // console.log("make quiz", quiz);
+    this.$emit("quizQuestions", quiz);
+    //   console.log("Quiz", quiz, this.subregionCountries[0].countries.slice(0));
+    //   this.quizQuestions = quiz;
+  }
+
   unlockFlags(subregion: string) {
-    console.log("Unlock!", subregion);
+    // console.log("Unlock!", subregion);
     const lockedCountries = this.getCountries(subregion).filter((c) => !c.isUnlocked);
     let indices = [];
     if (lockedCountries.length < NEW_FLAGS_AMOUNT) {
@@ -118,7 +179,19 @@ export default class MyFlagsComponent extends Vue {
     }
     const newFlags = indices.map((i) => lockedCountries[i]);
 
-    // TODO: Mark them all as unlocked in the database
+    newFlags.forEach((country) => {
+      const info = {
+        isUnlocked: true,
+        lastReviewed: country.lastReviewed,
+        numAttempts: country.numAttempts,
+        numCorrect: country.numCorrect,
+      };
+      // console.log("new flag", country);
+
+      // THIS WORKED
+      const name = stub(country.name);
+      set(ref(this.db, `countries/${name}`), info);
+    });
 
     this.$emit("newFlags", newFlags);
   }
@@ -183,8 +256,9 @@ export default class MyFlagsComponent extends Vue {
   }
 
   hasBeenReviewedToLevel(countries, level) {
-    const total = countries.length;
+    const total = countries.filter((c) => c.isUnlocked).length;
     const amountReviewedToLevel = countries.filter((c) => c.numCorrect >= level).length;
+    // console.log(amountReviewedToLevel, total);
     return amountReviewedToLevel / total >= 0.75;
   }
 

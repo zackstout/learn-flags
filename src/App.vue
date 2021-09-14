@@ -1,11 +1,15 @@
 <template>
   <div id="app">
-    <div>Your unlocked flags</div>
-    <MyFlags :subregionCountries="subregionCountries" @newFlags="handleNewFlags" />
+    <MyFlags
+      :subregionCountries="subregionCountries"
+      @newFlags="handleNewFlags"
+      @quizQuestions="handleQuizQuestions"
+      :db="db"
+    />
 
     <LearnFlags :countries="newFlags" v-if="newFlags.length > 0" />
 
-    <!-- <Quiz :questions="quizQuestions" :flagFirst="true" :db="db" /> -->
+    <Quiz :questions="quizQuestions" :flagFirst="true" :db="db" v-if="quizQuestions.length > 0" />
   </div>
 </template>
 
@@ -128,50 +132,6 @@ export const getRandom = (min, max) => {
   return min + Math.floor(Math.random() * (max - min));
 };
 
-const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
-  let indices = [];
-  if (pickedIndices.length > 0) {
-    indices = pickedIndices;
-  } else {
-    const targetLen = Math.min(pool.length, maxNum);
-    while (indices.length < targetLen) {
-      const r = getRandom(0, pool.length);
-      if (!indices.includes(r)) {
-        indices.push(r);
-      }
-    }
-  }
-
-  const result = indices.map((i, j) => {
-    const c = pool[i];
-    const answers = [{ name: c.name, flag: c.flag, isCorrect: true }];
-    let wrongAnswerIndices = [];
-
-    if (pool.length < 4) {
-      wrongAnswerIndices = indices.slice(0);
-      wrongAnswerIndices.splice(j, 1);
-    } else {
-      while (wrongAnswerIndices.length < 3) {
-        const x = getRandom(0, pool.length);
-        if (!wrongAnswerIndices.includes(x) && x !== i) {
-          wrongAnswerIndices.push(x);
-        }
-      }
-    }
-
-    // add 3 wrong answers
-    wrongAnswerIndices.forEach((k) => {
-      const c = pool[k];
-      const wrongAnswer = { name: c.name, flag: c.flag, isCorrect: false };
-      answers.push(wrongAnswer);
-    });
-
-    return answers; // TODO: scramble them
-  });
-
-  return result;
-};
-
 @Component({
   components: {
     Quiz,
@@ -181,7 +141,7 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
 })
 export default class App extends Vue {
   allSubregions = [];
-  db: any;
+  db: any = null;
   databaseCountries: any = [];
 
   // If this has membres, we should be showing quiz modal
@@ -194,6 +154,10 @@ export default class App extends Vue {
     this.newFlags = flags;
   }
 
+  handleQuizQuestions(questions) {
+    // console.log("emit", questions);
+    this.quizQuestions = questions;
+  }
   // - [ ] TODO: subregion could be a class, with all methods on there
 
   initData(row) {
@@ -212,12 +176,24 @@ export default class App extends Vue {
   // [x] Should merge together databaseCountries (info from DB) with allSubregions, which is API data
   // [x] Should return array  of subregions, each of which has name and countries, which have merged data
   // [x] Huh...not sure why change to databaseCountries doesn't trigger change here...Change to array?
+
+  // Is nesting messing up reactivity?
+  // Not seeing isUnlocked come through....
+  // Ahhhh adding new props does not trigger changes
   get subregionCountries() {
     return this.allSubregions.map((subregion) => {
       return {
         name: subregion.name,
         countries: subregion.values.map((country) => {
-          const c = this.databaseCountries.find((c) => unstub(c.name) === country.name);
+          let c = this.databaseCountries.find((c) => unstub(c.name) === country.name);
+          if (!c) {
+            c = {
+              isUnlocked: false,
+              numAttempts: 0,
+              numCorrect: 0,
+              lastReviewed: false,
+            };
+          }
           return Object.assign({}, country, c);
         }),
       };
@@ -231,6 +207,7 @@ export default class App extends Vue {
 
     document.addEventListener("mousedown", () => {
       this.newFlags = [];
+      this.quizQuestions = [];
     });
 
     onValue(ref(db, "countries"), (snapshot) => {
@@ -238,7 +215,7 @@ export default class App extends Vue {
 
       // This *should* "just work" ... and cause subregionCountries to update
       this.databaseCountries = Object.keys(data).map((name) => {
-        return Object.assign({ name }, data[name]);
+        return Object.assign({}, { name }, data[name]);
       });
     });
 
@@ -261,11 +238,11 @@ export default class App extends Vue {
       });
 
       // console.log("QUIZ", generateQuiz(this.countries, 5));
-      const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
-      console.log("Quiz", quiz, this.subregionCountries[0].countries);
-      this.quizQuestions = quiz;
+      // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
+      // console.log("Quiz", quiz, this.subregionCountries[0].countries.slice(0));
+      // this.quizQuestions = quiz;
 
-      this.newFlags = this.subregionCountries[0].countries;
+      // this.newFlags = this.subregionCountries[0].countries;
     });
   }
 }
@@ -301,5 +278,35 @@ img {
 button {
   font-size: 2rem;
   padding: 1rem;
+}
+
+.modal {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  opacity: 50%;
+  background: gray;
+  z-index: 40;
+}
+
+.modal-inner {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  height: 80vh;
+  width: 80vw;
+  border-radius: 2%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  opacity: 100%;
+  background: white;
+  padding: 2rem;
+  z-index: 50;
 }
 </style>

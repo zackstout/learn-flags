@@ -1,21 +1,24 @@
 <template>
-  <div class="quiz">
-    <h1>Test your Knowledge</h1>
-    <h2>Can you identify this flag?</h2>
+  <div>
+    <div class="modal"></div>
+    <div class="modal-inner" ref="inner">
+      <h1>Test your Knowledge</h1>
+      <h2>Can you identify this flag?</h2>
 
-    <h4>Question {{ questionIndex + 1 }} of {{ questions.length }}</h4>
+      <h4>Question {{ questionIndex + 1 }} of {{ questions.length }}</h4>
 
-    <div
-      v-if="flagFirst"
-      class="flag-image"
-      :style="{ backgroundImage: 'url(' + currentCorrectAnswer.flag + ')' }"
-    ></div>
-    <div style="font-size:5rem;" v-else>{{ currentCorrectAnswer.name }}</div>
+      <div
+        v-if="flagFirst"
+        class="flag-image"
+        :style="{ backgroundImage: 'url(' + currentCorrectAnswer.flag + ')' }"
+      ></div>
+      <div style="font-size:5rem;" v-else>{{ currentCorrectAnswer.name }}</div>
 
-    <div class="answers">
-      <div v-for="(answer, i) in currentQuestion" :key="i" class="answer" @click="answerClick(answer)">
-        <div v-if="flagFirst">{{ answer.name }}</div>
-        <div v-else class="answer-flag" :style="{ backgroundImage: 'url(' + answer.flag + ')' }"></div>
+      <div class="answers">
+        <div v-for="(answer, i) in currentQuestion" :key="i" class="answer" @click="answerClick(answer)">
+          <div v-if="flagFirst">{{ answer.name }}</div>
+          <div v-else class="answer-flag" :style="{ backgroundImage: 'url(' + answer.flag + ')' }"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -26,7 +29,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import { stub } from "@/App.vue";
 import { getDatabase, ref, set } from "firebase/database";
 
-// TODO: Use a modal
+// TODO: Think we want vuex.....  reactivity is getting annoying with nesting and adding props via Object.assign....
 
 // A quiz is an array of questions,
 // each of which is an array of answers
@@ -34,6 +37,7 @@ interface QuizAnswer {
   name: string;
   flag: string;
   isCorrect: boolean;
+  [prop: string]: any;
 }
 
 @Component({
@@ -47,7 +51,8 @@ export default class QuizComponent extends Vue {
   answeredWrong = false; // controls whether "try again" modal/message shows
 
   mounted() {
-    console.log("mount qz", this.questions);
+    // console.log("mount qz", this.questions.slice(0));
+    (this.$refs.inner as HTMLElement).addEventListener("mousedown", (ev: any) => ev.stopPropagation());
   }
 
   get currentQuestion() {
@@ -60,21 +65,20 @@ export default class QuizComponent extends Vue {
 
   answerClick(answer: QuizAnswer) {
     // - [ ] TODO: Handle right/wrong .... maybe gray out tried & wrong answers?
-    const stubbedName = stub(answer.name);
+    // Just give some feedback.
 
-    // TODO: Gonna have to  clone current value, merge in new property value.
-    // Pull in all subregionCountries for app?
-    // Really a case for State.....
-    // Is intention for this.questions to be reactive? Shouldn't need to be....
-
-    // set(ref(this.db, `countries/${stubbedName}`), {
-    //   lastReviewed: Date.now(),
-    //   isUnlocked: false,
-    //   numAttempts: 0,
-    //   numCorrect: 0,
-    // });
+    const name = stub(answer.name);
+    // console.log("answer...", answer, answer.isUnlocked);
+    const info = {
+      isUnlocked: answer.isUnlocked,
+      lastReviewed: answer.lastReviewed,
+      numAttempts: answer.numAttempts,
+      numCorrect: answer.numCorrect,
+    };
 
     if (answer.isCorrect) {
+      console.log("correct!");
+      info.numCorrect += 1;
       if (this.questionIndex < this.questions.length - 1) {
         // Not yet last one
         this.questionIndex += 1;
@@ -83,6 +87,9 @@ export default class QuizComponent extends Vue {
         console.log("done!");
       }
     }
+    info.numAttempts += 1;
+    console.log("set with info", info);
+    set(ref(this.db, `countries/${name}`), info);
   }
 }
 </script>
@@ -106,10 +113,10 @@ export default class QuizComponent extends Vue {
 }
 
 .quiz {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem 3rem;
+  padding: 1rem 3rem; */
 }
 
 .answers {

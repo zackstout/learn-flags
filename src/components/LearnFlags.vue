@@ -112,34 +112,4 @@ export default class LearnFlagsComponent extends Vue {
   background: gray;
   color: white;
 }
-
-.modal {
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0%;
-  left: 0%;
-  opacity: 50%;
-  background: gray;
-  z-index: 40;
-}
-
-.modal-inner {
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 10vh;
-  left: 10vw;
-  height: 80vh;
-  width: 80vw;
-  border-radius: 2%;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  opacity: 100%;
-  background: white;
-  padding: 2rem;
-  z-index: 50;
-}
 </style>
