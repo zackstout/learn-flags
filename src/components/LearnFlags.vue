@@ -94,6 +94,8 @@ export default class LearnFlagsComponent extends Vue {
   background-repeat: no-repeat;
   width: 50vw;
   height: 50vh;
+  filter: drop-shadow(2px 2px 3px black);
+  margin-left: 2rem;
 }
 
 .carets {

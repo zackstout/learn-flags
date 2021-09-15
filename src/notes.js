@@ -5,12 +5,13 @@
 
 // ============================================
 
+
 // [x] todo: actually fix quiz indices functionality (broken because pulliing inddce of filtered list)
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
 /// [x] could help a  lot if getCountries haandled regoin /subregion
 
-// - [ ] TODO: show flags against a background color??
+// - [x] TODO: show flags against a background color??
 
 // - [ ] TODO: modal should take up whole screen (or at least hide flags)
 // ahhh yeah why is it shifted down right????

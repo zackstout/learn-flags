@@ -77,13 +77,13 @@
                 class="flag-img"
                 :style="{
                   backgroundImage: country.isUnlocked ? 'url(' + country.flag + ')' : '',
-                  backgroundColor: 'gray',
                   width: '10vw',
                   height: '10vh',
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
                   marginTop: '10px',
+                  backgroundColor: country.isUnlocked ? '' : 'gray',
                 }"
               ></div>
             </div>
@@ -133,15 +133,6 @@ const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): Q
 
   const result = indices.map((i, j) => {
     let wrongAnswerIndices = [i];
-    // - [ ] TODO
-    // Ahhh right if only 3, first one is not guaranteed to be correct
-    // bug where  all can be same???
-    // Right............no guarantee that these indices (in pool passed  in)
-    // wwill match up to how they appear in subregionCountries, whicch is what is  used for Quiz getter...
-
-    // yeah, big issue
-    // only working for regions with alll countries unllocked haha
-    // Fix could be.... look  up c = pool[i] here, and then llook up its index within the actual subregionCounntries array.
 
     if (unlockedCountries.length < 4) {
       wrongAnswerIndices = indices.slice(0);
@@ -162,7 +153,9 @@ const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): Q
       countryIndex: countryIndex,
       answerIndices: answerIndices,
       subregion: c.subregion,
-    }; // TODO: scramble them
+    };
+
+    // TODO: scramble them
   });
 
   return result;
@@ -203,7 +196,6 @@ export const NEW_FLAGS_AMOUNT = 3;
   components: {},
 })
 export default class MyFlagsComponent extends Vue {
-  //   @Prop() readonly subregionCountries: any[];
   @Getter subregionCountries: any[];
   @Prop() db: any;
   @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
@@ -219,18 +211,6 @@ export default class MyFlagsComponent extends Vue {
   }
 
   takeQuiz(region: string) {
-    // const regionFound = REGIONS.find((x) => x.name === region);
-    // if (regionFound) {
-    //   // We actually have a REGION
-    //   unlockedCountries = (regionFound.subregions as string[]).reduce((acc, subregion) => {
-    //     return acc.concat(this.getCountries(subregion));
-    //   }, []);
-    // } else {
-    //   unlockedCountries = this.getCountries(region).filter((c) => c.isUnlocked);
-    // }
-
-    // const unlockedCountries=this.getCountries(region).filter(c=>c.isUnlocked);
-
     const quiz = generateQuizIndices(this.getCountries(region), 5);
     console.log("new quiz", quiz);
     this.setQuizIndices(quiz);
@@ -399,14 +379,6 @@ export default class MyFlagsComponent extends Vue {
 </script>
 
 <style scoped>
-.subregion:hover {
-  /* background: lightgray; */
-}
-
-.subregion {
-  /* display: flex; */
-}
-
 .region {
   padding-bottom: 4rem;
   border-bottom: 3px solid black;
@@ -425,6 +397,7 @@ export default class MyFlagsComponent extends Vue {
 
 .flag-img {
   opacity: 0.9;
+  filter: drop-shadow(2px 2px 3px black);
 }
 
 .flag-img:hover {

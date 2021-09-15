@@ -126,11 +126,11 @@ export default class QuizComponent extends Vue {
   background-position: center;
   background-repeat: no-repeat;
   width: 100%;
+  filter: drop-shadow(2px 2px 3px black);
 }
 
 .flag-image {
   height: 60vh;
-  background-color: gray;
 }
 
 .answer-flag {
