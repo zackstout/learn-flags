@@ -12,6 +12,16 @@
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
 
+// todo: zoomm maps to appropriate level for subregion?
+// we have lat//long for each country
+
+// Todo: figure out how to  get maps working dynamically.
+// e.g.. to  respond to hover of fllag, ii.e. change iin state.hoveredAlpha3
+
+// Todo: also change color of counntries in map once you have unlcoked the fllag
+
+// [x] Todo: add maps for regions
+
 // rename subregionCountries.....because it's array of subregions which are arrays of countries (and also they have names)
 
 // - [ ] TODO: break my flags flag card out to component

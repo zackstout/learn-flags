@@ -11,7 +11,8 @@ const store = new Vuex.Store({
     state: {
         databaseCountries: [],
         subregions: [],
-        quizIndices: []
+        quizIndices: [],
+        hoveredAlpha3: ""
     },
     getters: {
         subregionCountries(state) {
@@ -65,6 +66,10 @@ const store = new Vuex.Store({
         },
         setQuizIndices(state, questionIndices: QuizQuestionIndices[]) {
             state.quizIndices = questionIndices;
+        },
+        setHoveredAlpha3(state, code: string) {
+            state.hoveredAlpha3 = code;
+            // console.log(code);
         }
     },
 });

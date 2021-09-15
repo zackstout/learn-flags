@@ -1,6 +1,6 @@
 <template>
   <div style="font-size:1rem; padding:2rem;">
-    <div v-for="region in regions" :key="region.name" class="region">
+    <div v-for="region in regions" :key="region.name" class="region" :id="stubInner(region.name)">
       <h2>{{ region.name }}</h2>
 
       <!-- <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
@@ -90,6 +90,8 @@
                   marginTop: '10px',
                   backgroundColor: country.isUnlocked ? '' : 'gray',
                 }"
+                @mouseenter="setHoveredAlpha3(country.alpha3Code)"
+                @mouseleave="setHoveredAlpha3('')"
               ></div>
             </div>
           </div>
@@ -209,6 +211,7 @@ export default class MyFlagsComponent extends Vue {
   @Getter subregionCountries: any[];
   @Prop() db: any;
   @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
+  @Mutation setHoveredAlpha3: (x: string) => void;
 
   regions = REGIONS;
   countriesForMap = [];
@@ -227,15 +230,18 @@ export default class MyFlagsComponent extends Vue {
     });
 
     // TODO: figure out async/race issues
-    // TODO: maybe hide map if subregion is locked
+    // [x] TODO: maybe hide map if subregion is locked
     setTimeout(() => {
       console.log("mount my flags", this.subregionCountries);
       if (this.subregionCountries.length > 0) {
         REGIONS.forEach((region) => {
+          // Always show map for region, even if not unlocked
+          this.setupMap(region.name, true);
           region.subregions.forEach((subregion) => {
             const subregionName = stub(subregion);
+            const subregionUnlocked = this.getCountries(subregion).some((c) => c.isUnlocked);
 
-            if (subregionName) {
+            if (subregionName && subregionUnlocked) {
               this.setupMap(subregionName);
             }
           });
@@ -293,6 +299,10 @@ export default class MyFlagsComponent extends Vue {
 
     this.$emit("newFlags", newFlags);
   }
+
+  // ======================================================================
+  // RULES/LOGIC FOR UNLOCKING FLAGS
+  // ======================================================================
 
   // Should return a message  and a boolean  "value"
   // Message should be EITHER
@@ -365,6 +375,8 @@ export default class MyFlagsComponent extends Vue {
     return amountReviewedToLevel / total >= 0.75;
   }
 
+  // ======================================================================
+
   // Only let user unlock new subregion in region
   // IF every subregion in the region that has any unlocked countries has ALL unlocked countries
   // How to determine whether they can start a new continent? Maybe just let them? That's current behavior
@@ -425,8 +437,8 @@ export default class MyFlagsComponent extends Vue {
   }
 
   // ================================
-
-  setupMap(subregion: string = "Eastern_Asia") {
+  // isRegion describes whether input is a region rather than a subregion
+  setupMap(subregion: string = "Eastern_Asia", isRegion = false) {
     var width = 600;
     var height = 400;
 
@@ -439,7 +451,8 @@ export default class MyFlagsComponent extends Vue {
 
     var svg = d3
       .select(selector)
-      .append("svg")
+      .insert("svg", ":nth-child(2)") // put the map before first child!, rather than using append
+      // however, this does put it above title....
       .attr("width", width)
       .attr("height", height);
 
@@ -457,7 +470,15 @@ export default class MyFlagsComponent extends Vue {
       .attr("fill", (d) => {
         const country = this.countriesForMap.find((c) => parseInt(c.uni) === d.id);
         const alpha3 = country ? country.iso3 : "";
-        const targets = this.subregionCountries.find((x) => x.name === unstub(subregion)).countries;
+        let targets = [];
+        if (isRegion) {
+          targets = REGIONS.find((reg) => reg.name === subregion).subregions.reduce(
+            (acc, val) => acc.concat(this.subregionCountries.find((x) => x.name === val).countries),
+            []
+          );
+        } else {
+          targets = this.subregionCountries.find((x) => x.name === unstub(subregion)).countries;
+        }
         return targets.map((country) => country.alpha3Code).includes(alpha3) ? "blue" : "gray";
       });
   }
