@@ -7,7 +7,12 @@
         Review Region
       </button> -->
 
-      <div v-for="subregion in sortSubregions(region.subregions)" :key="subregion" class="subregion">
+      <div
+        :id="stubInner(subregion)"
+        v-for="subregion in sortSubregions(region.subregions)"
+        :key="subregion"
+        class="subregion"
+      >
         <h3>{{ subregion }}</h3>
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
@@ -109,11 +114,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { getRandom, unstub, stub } from "@/App.vue";
 import { ref, set } from "firebase/database";
 import { Getter, Mutation } from "vuex-class";
 import { Country, QuizQuestionIndices } from "@/interfaces";
+import * as d3 from "d3";
 
 const fillWithRandomIndices = (arr, targetLen, poolLen, cannotInclude?) => {
   while (arr.length < targetLen) {
@@ -165,7 +171,7 @@ const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): Q
   return result;
 };
 
-const REGIONS = [
+export const REGIONS = [
   {
     name: "Asia",
     subregions: ["Central Asia", "Western Asia", "South-Eastern Asia", "Eastern Asia", "Southern Asia"],
@@ -205,9 +211,47 @@ export default class MyFlagsComponent extends Vue {
   @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
 
   regions = REGIONS;
+  countriesForMap = [];
+
+  worldMapData = null;
+
+  mounted() {
+    d3.json("countriesForMap.json").then((data) => {
+      // console.log("all countries", data);
+      this.countriesForMap = data;
+    });
+
+    d3.json("world-110m2.json").then((data) => {
+      this.worldMapData = data;
+      console.log("world map data", data);
+    });
+
+    // TODO: figure out async/race issues
+    // TODO: maybe hide map if subregion is locked
+    setTimeout(() => {
+      console.log("mount my flags", this.subregionCountries);
+      if (this.subregionCountries.length > 0) {
+        REGIONS.forEach((region) => {
+          region.subregions.forEach((subregion) => {
+            const subregionName = stub(subregion);
+
+            if (subregionName) {
+              this.setupMap(subregionName);
+            }
+          });
+        });
+      } else {
+        console.log("Failed to load countries in time for maps.");
+      }
+    }, 1000);
+  }
 
   numberWithCommas(x: number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  stubInner(x: string) {
+    return stub(x);
   }
 
   unstubInner(x: string) {
@@ -378,6 +422,44 @@ export default class MyFlagsComponent extends Vue {
   totalUnlocked(subregion: string) {
     const countries = this.getCountries(subregion);
     return countries.filter((country) => country.isUnlocked).length;
+  }
+
+  // ================================
+
+  setupMap(subregion: string = "Eastern_Asia") {
+    var width = 600;
+    var height = 400;
+
+    const selector = `#${subregion}`;
+
+    var projection = d3
+      .geoMercator()
+      .scale(80)
+      .center([90.3, 35]);
+
+    var svg = d3
+      .select(selector)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    var path = d3.geoPath().projection(projection);
+    var g = svg.append("g");
+
+    //@ts-ignore
+    const geoms = topojson.object(this.worldMapData, this.worldMapData.objects.countries).geometries;
+
+    g.selectAll("path")
+      .data(geoms)
+      .enter()
+      .append("path")
+      .attr("d", path)
+      .attr("fill", (d) => {
+        const country = this.countriesForMap.find((c) => parseInt(c.uni) === d.id);
+        const alpha3 = country ? country.iso3 : "";
+        const targets = this.subregionCountries.find((x) => x.name === unstub(subregion)).countries;
+        return targets.map((country) => country.alpha3Code).includes(alpha3) ? "blue" : "gray";
+      });
   }
 }
 </script>

@@ -13,8 +13,6 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 
-import * as d3 from "d3";
-
 import * as axios from "axios";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue } from "firebase/database";
@@ -71,8 +69,6 @@ export default class App extends Vue {
   databaseCountries: any = [];
   @Getter quiz: QuizQuestion[];
 
-  countriesForMap = [];
-
   welcomeHtml = WELCOME_HTML;
 
   @Getter subregionCountries: any[];
@@ -124,7 +120,7 @@ export default class App extends Vue {
         })
       );
 
-      this.setupMap();
+      // this.setupMap();
     });
 
     // Transform data for markup to consume:
@@ -162,47 +158,6 @@ export default class App extends Vue {
       // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
       // this.quizQuestions = quiz;
       // this.newFlags = this.subregionCountries[0].countries;
-    });
-  }
-
-  setupMap() {
-    d3.json("allCountries2.json").then((data) => {
-      console.log("all countries", data);
-      this.countriesForMap = data;
-      // console.log("all countries", this, this.countriesForMap);
-    });
-
-    var width = 1200;
-    var height = 1000;
-
-    var projection = d3.geoMercator().scale(150);
-
-    var svg = d3
-      .select("body")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    var path = d3.geoPath().projection(projection);
-    var g = svg.append("g");
-
-    d3.json("world-110m2.json").then((data) => {
-      console.log("world map data", data);
-
-      //@ts-ignore
-      const geoms = topojson.object(data, data.objects.countries).geometries;
-
-      g.selectAll("path")
-        .data(geoms)
-        .enter()
-        .append("path")
-        .attr("d", path)
-        .attr("fill", (d) => {
-          const country = this.countriesForMap.find((c) => parseInt(c.uni) === d.id);
-          const alpha3 = country ? country.iso3 : "";
-          const targets = this.subregionCountries[0].countries;
-          return targets.map((country) => country.alpha3Code).includes(alpha3) ? "blue" : "gray";
-        });
     });
   }
 }

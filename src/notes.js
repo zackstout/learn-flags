@@ -12,6 +12,8 @@
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
 
+// rename subregionCountries.....because it's array of subregions which are arrays of countries (and also they have names)
+
 // - [ ] TODO: break my flags flag card out to component
 
 // - [ ] TODO: modal should take up whole screen (or at least hide flags)
