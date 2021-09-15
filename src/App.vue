@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="welcome" v-html="welcomeHtml"></div>
+    <!-- <div class="welcome" v-html="welcomeHtml"></div> -->
 
     <MyFlags :subregionCountries="subregionCountries" @newFlags="handleNewFlags" :db="db" />
 

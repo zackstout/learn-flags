@@ -1,7 +1,7 @@
 <template>
   <div style="font-size:1rem; padding:2rem;">
     <div v-for="region in regions" :key="region.name" class="region" :id="stubInner(region.name)">
-      <h2>{{ region.name }}</h2>
+      <div style="font-size:3.5rem; font-weight:bold;">{{ region.name }}</div>
 
       <!-- <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
         Review Region
@@ -13,7 +13,7 @@
         :key="subregion"
         class="subregion"
       >
-        <h3>{{ subregion }}</h3>
+        <div style="font-size:2.3rem; font-weight:bold;">{{ subregion }}</div>
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
           <div style="display:flex; flex-direction:column;">
@@ -52,7 +52,7 @@
 
           <div class="countries-container">
             <div v-for="country in sortCountries(getCountries(subregion))" :key="country.name" class="country">
-              <div style="font-weight:bold; font-size:1.2rem; ">{{ unstubInner(country.name) }}</div>
+              <div style="font-weight:bold; font-size:1.2rem; max-width:10rem;">{{ unstubInner(country.name) }}</div>
               <div>
                 <div v-if="country.isUnlocked">
                   <span style="font-weight:bold;">Capital:</span>&emsp;<span>{{ country.capital }}</span>
@@ -94,6 +94,17 @@
                 @mouseleave="setHoveredAlpha3('')"
               ></div>
             </div>
+          </div>
+
+          <div>
+            <svg width="600" height="400">
+              <path
+                v-for="(geom, i) in allGeoms"
+                :key="i"
+                :d="getPath(geom, subregion).d"
+                :fill="getPath(geom, subregion).fill"
+              />
+            </svg>
           </div>
         </div>
         <div v-else>
@@ -218,6 +229,11 @@ export default class MyFlagsComponent extends Vue {
 
   worldMapData = null;
 
+  get allGeoms() {
+    // @ts-ignore
+    return topojson.object(this.worldMapData, this.worldMapData.objects.countries).geometries;
+  }
+
   mounted() {
     d3.json("countriesForMap.json").then((data) => {
       // console.log("all countries", data);
@@ -236,15 +252,14 @@ export default class MyFlagsComponent extends Vue {
       if (this.subregionCountries.length > 0) {
         REGIONS.forEach((region) => {
           // Always show map for region, even if not unlocked
-          this.setupMap(region.name, true);
-          region.subregions.forEach((subregion) => {
-            const subregionName = stub(subregion);
-            const subregionUnlocked = this.getCountries(subregion).some((c) => c.isUnlocked);
-
-            if (subregionName && subregionUnlocked) {
-              this.setupMap(subregionName);
-            }
-          });
+          // this.setupMap(region.name, true);
+          // region.subregions.forEach((subregion) => {
+          //   const subregionName = stub(subregion);
+          //   const subregionUnlocked = this.getCountries(subregion).some((c) => c.isUnlocked);
+          //   if (subregionName && subregionUnlocked) {
+          //     this.setupMap(subregionName);
+          //   }
+          // });
         });
       } else {
         console.log("Failed to load countries in time for maps.");
@@ -437,54 +452,38 @@ export default class MyFlagsComponent extends Vue {
   }
 
   // ================================
-  // isRegion describes whether input is a region rather than a subregion
-  setupMap(subregion: string = "Eastern_Asia", isRegion = false) {
-    var width = 600;
-    var height = 400;
 
-    const selector = `#${subregion}`;
+  getPath(geom: any, subregion: string) {
+    const { id } = geom;
 
+    const country = this.countriesForMap.find((c) => parseInt(c.uni) === id);
+    const alpha3 = country ? country.iso3 : "";
+
+    const countryData = this.subregionCountries
+      .reduce((acc, val) => {
+        return acc.concat(val.countries || []);
+      }, [])
+      .find((x) => x.alpha3Code === alpha3);
+
+    let fill = "gray";
+    if (countryData && countryData.subregion === subregion) {
+      fill = "blue";
+      if (countryData.isUnlocked) {
+        fill = "gold";
+      }
+    }
+
+    // TODO: only need once
     var projection = d3
       .geoMercator()
       .scale(80)
-      .center([90.3, 35]);
-
-    var svg = d3
-      .select(selector)
-      .insert("svg", ":nth-child(2)") // put the map before first child!, rather than using append
-      // however, this does put it above title....
-      .attr("width", width)
-      .attr("height", height);
-
+      .center([150, 35]);
     var path = d3.geoPath().projection(projection);
-    var g = svg.append("g");
 
-    //@ts-ignore
-    const geoms = topojson.object(this.worldMapData, this.worldMapData.objects.countries).geometries;
-
-    g.selectAll("path")
-      .data(geoms)
-      .enter()
-      .append("path")
-      .attr("d", path)
-      .attr("fill", (d) => {
-        const country = this.countriesForMap.find((c) => parseInt(c.uni) === d.id);
-        const alpha3 = country ? country.iso3 : "";
-        let targets = [];
-        if (isRegion) {
-          targets = REGIONS.find((reg) => reg.name === subregion).subregions.reduce(
-            (acc, val) => acc.concat(this.subregionCountries.find((x) => x.name === val).countries),
-            []
-          );
-        } else {
-          targets = this.subregionCountries.find((x) => x.name === unstub(subregion)).countries;
-        }
-        const showCountry = targets.map((country) => country.alpha3Code).includes(alpha3);
-        if (!showCountry) return "gray";
-        const highlightCountry = targets.find((c) => c.alpha3Code === alpha3).isUnlocked;
-        if (highlightCountry) return "gold";
-        return "blue";
-      });
+    return {
+      fill,
+      d: path(geom),
+    };
   }
 }
 </script>
@@ -497,6 +496,7 @@ export default class MyFlagsComponent extends Vue {
 
 .subregion {
   margin-left: 2rem;
+  padding: 2rem 0;
 }
 
 .countries-container {

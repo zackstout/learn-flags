@@ -12,6 +12,13 @@
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
 
+// todo: flags should sort so that most recently unloccked are first.
+// This means we wannt t o store when a flag was unlocked.
+// Handle that with the time stuff..
+
+
+// maybe map would look better AFTER flags within subregion?
+
 // todo: zoomm maps to appropriate level for subregion?
 // we have lat//long for each country
 
@@ -119,7 +126,9 @@ And then world quiz itself will for sure be hard.
 
 //  todo: sort subregions so that all commpleted ones come first
 
-// todo: outlyinng islands has nno fllag? in norhtern america
+// [x] todo: outlyinng islands has nno fllag? in norhtern america -- lol text wasnt wrapping
+
+// todo: greenland not caught on map
 
 // - [ ] TODO: add tailwind
 
