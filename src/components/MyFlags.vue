@@ -51,7 +51,13 @@
           </div>
 
           <div class="countries-container">
-            <div v-for="country in sortCountries(getCountries(subregion))" :key="country.name" class="country">
+            <div
+              v-for="country in sortCountries(getCountries(subregion))"
+              :key="country.name"
+              class="country"
+              @mouseover="setHoveredAlpha3(country.alpha3Code)"
+              @mouseleave="setHoveredAlpha3('')"
+            >
               <div style="font-weight:bold; font-size:1.2rem; max-width:10rem;">{{ unstubInner(country.name) }}</div>
               <div>
                 <div v-if="country.isUnlocked">
@@ -65,6 +71,13 @@
                   <span style="font-weight:bold;">Population:</span>&emsp;<span>{{
                     numberWithCommas(country.population)
                   }}</span>
+                </div>
+                <div v-else>???</div>
+              </div>
+
+              <div>
+                <div v-if="country.isUnlocked">
+                  <span style="font-weight:bold;">Alpha3:</span>&emsp;<span>{{ country.alpha3Code }}</span>
                 </div>
                 <div v-else>???</div>
               </div>
@@ -90,8 +103,6 @@
                   marginTop: '10px',
                   backgroundColor: country.isUnlocked ? '' : 'gray',
                 }"
-                @mouseenter="setHoveredAlpha3(country.alpha3Code)"
-                @mouseleave="setHoveredAlpha3('')"
               ></div>
             </div>
           </div>
@@ -130,7 +141,7 @@
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { getRandom, unstub, stub } from "@/App.vue";
 import { ref, set } from "firebase/database";
-import { Getter, Mutation } from "vuex-class";
+import { Getter, Mutation, State } from "vuex-class";
 import { Country, QuizQuestionIndices } from "@/interfaces";
 import * as d3 from "d3";
 
@@ -223,6 +234,7 @@ export default class MyFlagsComponent extends Vue {
   @Prop() db: any;
   @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
   @Mutation setHoveredAlpha3: (x: string) => void;
+  @State hoveredAlpha3: string;
 
   regions = REGIONS;
   countriesForMap = [];
@@ -230,6 +242,7 @@ export default class MyFlagsComponent extends Vue {
   worldMapData = null;
 
   get allGeoms() {
+    if (!this.worldMapData) return [];
     // @ts-ignore
     return topojson.object(this.worldMapData, this.worldMapData.objects.countries).geometries;
   }
@@ -244,27 +257,6 @@ export default class MyFlagsComponent extends Vue {
       this.worldMapData = data;
       console.log("world map data", data);
     });
-
-    // TODO: figure out async/race issues
-    // [x] TODO: maybe hide map if subregion is locked
-    setTimeout(() => {
-      console.log("mount my flags", this.subregionCountries);
-      if (this.subregionCountries.length > 0) {
-        REGIONS.forEach((region) => {
-          // Always show map for region, even if not unlocked
-          // this.setupMap(region.name, true);
-          // region.subregions.forEach((subregion) => {
-          //   const subregionName = stub(subregion);
-          //   const subregionUnlocked = this.getCountries(subregion).some((c) => c.isUnlocked);
-          //   if (subregionName && subregionUnlocked) {
-          //     this.setupMap(subregionName);
-          //   }
-          // });
-        });
-      } else {
-        console.log("Failed to load countries in time for maps.");
-      }
-    }, 1000);
   }
 
   numberWithCommas(x: number) {
@@ -466,10 +458,17 @@ export default class MyFlagsComponent extends Vue {
       .find((x) => x.alpha3Code === alpha3);
 
     let fill = "gray";
+
     if (countryData && countryData.subregion === subregion) {
+      // console.log("this", this.hoveredAlpha3, "alp", alpha3);
+
       fill = "blue";
       if (countryData.isUnlocked) {
         fill = "gold";
+      }
+
+      if (this.hoveredAlpha3 === alpha3) {
+        fill = "red";
       }
     }
 
