@@ -3,34 +3,37 @@
 // So many "apps"  I've started and left half-done
 // I think this is one we can "finish" and polish
 
+// Also has potential extensions 
+// -- German vocab comes to mind.
+// Maybe types of trees
+
 // ============================================
 
-
-// [x] todo: actually fix quiz indices functionality (broken because pulliing inddce of filtered list)
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
-/// [x] could help a  lot if getCountries haandled regoin /subregion
 
-// - [x] TODO: show flags against a background color??
+// - [ ] TODO: break my flags flag card out to component
 
 // - [ ] TODO: modal should take up whole screen (or at least hide flags)
 // ahhh yeah why is it shifted down right????
 
 // - [ ] TODO: swap answers! lol
 
+// - [ ] TODO: also show totals for unlocked/reviews for regions
+
+// - [ ] TODO: work on quiz done page
 // - [ ] TODO: indication that you can unlock flags? after you review enough
 // - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
-// Click for another quiz?
+// - [ ] TODO: for another quiz?
 
 // - [ ] TODO: ensure stuff never overflows modals
 
-// todo: handle "must have reviewed all in last day" thing
+// - [ ] TODO: handle "must have reviewed all in last day" thing
 
-// todo: do not hover buttons opacity if disabeld
+// - [ ] TODO: build borders display (show tiny flags for countries it borders!)
 
-// todo: build borders display (show tiny flags for countries it borders!)
-
-// todo: fun to show languages too -- maybe currencies, maybe area?
+// - [ ] TODO: fun to show languages too -- maybe currencies, maybe area?
+// at least in "new flags" view, if not in my flags view
 
 // - [x] TODO: Sort countries within subregion in MyFlags by whether isUnlocked
 // - [x] TODO: do not show Unlock flags button if have all flags!
@@ -44,7 +47,11 @@
 // - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
 // - [x] add star if have unlocked all in subregion
 // - [x] move fillWithRandomIndices to fn
-
+// [x] todo: actually fix quiz indices functionality (broken because pulliing inddce of filtered list)
+/// [x] could help a  lot if getCountries haandled regoin /subregion
+// - [x] TODO: show flags against a background color??
+// yes drop shadow is perfect solution
+// - [x] add visual organization with indents -- feels nice (good placeholder for accordions)
 
 // THINK ABOUT:
 // ===================================
@@ -66,8 +73,7 @@
 
 // - [ ] TODO: think about quiz params -- flagFirst??
 
-
-// should nnot have any with uder 50% succceses rate? before can unlock more flags? (a fourth thing)
+// should nnot have any with uder 50% success rate? before can unlock more flags? (a fourth thing)
 
 // - [ ] TODO: tinker with unlock rules params
 
@@ -99,6 +105,10 @@ And then world quiz itself will for sure be hard.
 // LOWER PRIORITY:
 // ===================================
 
+//  todo: sort subregions so that all commpleted ones come first
+
+// todo: outlyinng islands has nno fllag? in norhtern america
+
 // - [ ] TODO: add tailwind
 
 // - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
@@ -109,6 +119,7 @@ And then world quiz itself will for sure be hard.
 // Maybe a "i got it" button? to hide from quizzes?
 
 // - [ ] TODO: hover flag increases scale? not sure. Because, can you click it??
+// could be cool to highlight the counntry in the MAAP if you hover the country in subregion vview
 
 // - [ ] TODO: subregions, and prob regions should be Accordions.
 
@@ -117,6 +128,8 @@ And then world quiz itself will for sure be hard.
 // - [x] TODO: Unlock subregions not working.....?
 // Oh no it is. We let  you unlock new continents for free right now.
 
+
+// todo: do not hover buttons opacity if disabeld
 
 
 // Ahhh...maybe we need/want this to preserve REFRENCSE

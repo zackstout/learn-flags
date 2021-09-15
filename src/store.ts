@@ -21,21 +21,10 @@ const store = new Vuex.Store({
                     name: subregion.name,
                     countries: subregion.values.map((country) => {
                         let c = state.databaseCountries.find((c) => unstub(c.name) === country.name);
-
-                        // Try to get around "no reactivity if adding props" issue -- justuse vuex state
-                        // if (!c) {
-                        //   c = {
-                        //     isUnlocked: false,
-                        //     numAttempts: 0,
-                        //     numCorrect: 0,
-                        //     lastReviewed: false,
-                        //   };
-                        // }
                         return Object.assign({}, country, c);
                     }),
                 };
             });
-            // console.log("get...", x);
 
             return x;
         },

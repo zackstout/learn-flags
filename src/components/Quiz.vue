@@ -93,7 +93,7 @@ export default class QuizComponent extends Vue {
     };
 
     if (answer.name === questionCountry.name) {
-      console.log("correct!");
+      // console.log("correct!");
 
       this.feedback.isError = false;
       this.feedback.message = "Choose an answer.";
@@ -104,8 +104,7 @@ export default class QuizComponent extends Vue {
         this.questionIndex += 1;
       } else {
         // Last one --
-        // TODO: must close out the quiz
-        console.log("done!");
+        // console.log("done!");
         this.complete = true;
       }
     } else {

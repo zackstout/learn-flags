@@ -3,14 +3,12 @@
     <div v-for="region in regions" :key="region.name" class="region">
       <h2>{{ region.name }}</h2>
 
-      <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
+      <!-- <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
         Review Region
-      </button>
+      </button> -->
 
       <div v-for="subregion in sortSubregions(region.subregions)" :key="subregion" class="subregion">
         <h3>{{ subregion }}</h3>
-
-        <!-- <h4>Total: {{ subregion.countries.length }}</h4> -->
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
           <div style="display:flex; flex-direction:column;">
@@ -37,7 +35,9 @@
               >
                 Unlock Flags
               </button>
-              <div style="color:gray; margin-left:1rem;">{{ unlockFlagsDisabled(subregion).message }}</div>
+              <div style="color:gray; margin-left:1rem; font-style:italic;">
+                {{ unlockFlagsDisabled(subregion).message }}
+              </div>
             </div>
 
             <button @click="takeQuiz(subregion)" style="width:8rem; margin: 0.5rem 0;">
@@ -47,7 +47,7 @@
 
           <div class="countries-container">
             <div v-for="country in sortCountries(getCountries(subregion))" :key="country.name" class="country">
-              <div style="font-weight:bold; font-size:1.2rem;">{{ unstubInner(country.name) }}</div>
+              <div style="font-weight:bold; font-size:1.2rem; ">{{ unstubInner(country.name) }}</div>
               <div>
                 <div v-if="country.isUnlocked">
                   <span style="font-weight:bold;">Capital:</span>&emsp;<span>{{ country.capital }}</span>
@@ -90,10 +90,14 @@
           </div>
         </div>
         <div v-else>
-          <span>Subregion locked.</span>
+          <!-- <span>Subregion locked.</span> -->
+
+          <div v-if="unlockSubregionDisabled(subregion)" style="font-style:italic; color:gray; ">
+            You must complete all open subregions in this region to unlock another.
+          </div>
           <button
             :disabled="unlockSubregionDisabled(subregion)"
-            style="margin-left:1rem; background-color:gold;"
+            style="margin-left:1rem; background-color:darkorange; margin:0.5rem 0;"
             @click="unlockFlags(subregion)"
           >
             Unlock subregion
@@ -384,10 +388,16 @@ export default class MyFlagsComponent extends Vue {
   border-bottom: 3px solid black;
 }
 
+.subregion {
+  margin-left: 2rem;
+}
+
 .countries-container {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
+  font-size: 0.8rem;
+  margin-left: 2rem;
   /* flex-direction: column; */
 }
 
