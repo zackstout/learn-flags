@@ -479,7 +479,11 @@ export default class MyFlagsComponent extends Vue {
         } else {
           targets = this.subregionCountries.find((x) => x.name === unstub(subregion)).countries;
         }
-        return targets.map((country) => country.alpha3Code).includes(alpha3) ? "blue" : "gray";
+        const showCountry = targets.map((country) => country.alpha3Code).includes(alpha3);
+        if (!showCountry) return "gray";
+        const highlightCountry = targets.find((c) => c.alpha3Code === alpha3).isUnlocked;
+        if (highlightCountry) return "gold";
+        return "blue";
       });
   }
 }

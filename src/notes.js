@@ -18,7 +18,7 @@
 // Todo: figure out how to  get maps working dynamically.
 // e.g.. to  respond to hover of fllag, ii.e. change iin state.hoveredAlpha3
 
-// Todo: also change color of counntries in map once you have unlcoked the fllag
+// [x] Todo: also change color of counntries in map once you have unlcoked the fllag
 
 // [x] Todo: add maps for regions
 
