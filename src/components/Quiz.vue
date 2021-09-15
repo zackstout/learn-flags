@@ -2,20 +2,20 @@
   <div>
     <div class="modal"></div>
     <div class="modal-inner" ref="inner">
-      <h1>Test your Knowledge</h1>
-      <h2>Can you identify this flag?</h2>
+      <!-- <div style="font-size:3rem;">Test your Knowledge</div> -->
+      <div style="font-size:3rem;">Can you identify this flag?</div>
 
-      <h4>Question {{ questionIndex + 1 }} of {{ questions.length }}</h4>
+      <div style="font-size:1.5rem; margin:2rem 0;">Question {{ questionIndex + 1 }} of {{ quiz.length }}</div>
 
       <div
         v-if="flagFirst"
         class="flag-image"
-        :style="{ backgroundImage: 'url(' + currentCorrectAnswer.flag + ')' }"
+        :style="{ backgroundImage: 'url(' + currentQuestion.country.flag + ')' }"
       ></div>
-      <div style="font-size:5rem;" v-else>{{ currentCorrectAnswer.name }}</div>
+      <div style="font-size:5rem;" v-else>{{ currentQuestion.country.name }}</div>
 
       <div class="answers">
-        <div v-for="(answer, i) in currentQuestion" :key="i" class="answer" @click="answerClick(answer)">
+        <div v-for="(answer, i) in currentQuestion.answers" :key="i" class="answer" @click="answerClick(answer)">
           <div v-if="flagFirst">{{ answer.name }}</div>
           <div v-else class="answer-flag" :style="{ backgroundImage: 'url(' + answer.flag + ')' }"></div>
         </div>
@@ -28,52 +28,48 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { stub } from "@/App.vue";
 import { getDatabase, ref, set } from "firebase/database";
+import { State, Mutation, Getter } from "vuex-class";
+import { QuizQuestion, Country } from "@/interfaces";
 
 // TODO: Think we want vuex.....  reactivity is getting annoying with nesting and adding props via Object.assign....
-
-// A quiz is an array of questions,
-// each of which is an array of answers
-interface QuizAnswer {
-  name: string;
-  flag: string;
-  isCorrect: boolean;
-  [prop: string]: any;
-}
 
 @Component({
   components: {},
 })
 export default class QuizComponent extends Vue {
   @Prop({ default: true }) readonly flagFirst: boolean;
-  @Prop() readonly questions: QuizAnswer[][];
+  // @Prop() readonly questions: QuizAnswer[][];
+
+  @Getter quiz: QuizQuestion[];
   @Prop() db: any;
+
   questionIndex = 0;
   answeredWrong = false; // controls whether "try again" modal/message shows
 
   mounted() {
     // console.log("mount qz", this.questions.slice(0));
+    // this.$nextTick(() => {
     (this.$refs.inner as HTMLElement).addEventListener("mousedown", (ev: any) => ev.stopPropagation());
+    // });
   }
 
-  get currentQuestion(): QuizAnswer[] {
-    return this.questions.length > 0 ? this.questions[this.questionIndex] : [];
+  get currentQuestion(): QuizQuestion {
+    if (this.quiz.length === 0) return { country: null, answers: [] };
+    return this.quiz[this.questionIndex];
   }
 
-  get currentCorrectAnswer() {
-    return this.currentQuestion.find((x) => x.isCorrect);
-  }
-
-  answerClick(answer: QuizAnswer) {
+  answerClick(answer: Country) {
     // - [ ] TODO: Handle right/wrong .... maybe gray out tried & wrong answers?
     // Just give some feedback.
 
     // OHO!  We don't update ANSWER's data, but QUESTION'S........
-
     // TODO: this not really working......
+    // const questionCountry = this.currentQuestion.find((x) => x.isCorrect);
 
-    const questionCountry = this.currentQuestion.find((x) => x.isCorrect);
+    const questionCountry = this.currentQuestion.country;
     const name = stub(questionCountry.name);
-    console.log(questionCountry.numAttempts, name);
+    // console.log(questionCountry.numAttempts, name);
+
     const info = {
       isUnlocked: questionCountry.isUnlocked,
       lastReviewed: questionCountry.lastReviewed,
@@ -81,10 +77,10 @@ export default class QuizComponent extends Vue {
       numCorrect: questionCountry.numCorrect,
     };
 
-    if (answer.isCorrect) {
+    if (answer.name === questionCountry.name) {
       console.log("correct!");
       info.numCorrect += 1;
-      if (this.questionIndex < this.questions.length - 1) {
+      if (this.questionIndex < this.quiz.length - 1) {
         // Not yet last one
         this.questionIndex += 1;
       } else {
@@ -94,7 +90,7 @@ export default class QuizComponent extends Vue {
       }
     }
     info.numAttempts += 1;
-    console.log("set with info", info);
+    console.log("set with info", info.numCorrect, info.numAttempts);
     set(ref(this.db, `countries/${name}`), info);
   }
 }

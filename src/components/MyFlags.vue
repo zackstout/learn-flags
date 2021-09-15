@@ -1,5 +1,5 @@
 <template>
-  <div style="font-size:1rem;">
+  <div style="font-size:1rem; padding:2rem;">
     <div v-for="region in regions" :key="region.name" class="region">
       <h2>{{ region.name }}</h2>
 
@@ -10,7 +10,7 @@
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
           <div style="display:flex; flex-direction:column;">
-            <div style="display:flex; align-items:center;">
+            <div style="display:flex; align-items:center;" v-if="hasLockedCountries(subregion)">
               <button
                 :disabled="unlockFlagsDisabled(subregion).value"
                 @click="unlockFlags(subregion)"
@@ -27,7 +27,7 @@
           </div>
 
           <div class="countries-container">
-            <div v-for="country in getCountries(subregion)" :key="country.name" class="country">
+            <div v-for="country in sortCountries(getCountries(subregion))" :key="country.name" class="country">
               <div style="font-weight:bold; font-size:1.2rem;">{{ unstubInner(country.name) }}</div>
               <div>
                 <div v-if="country.isUnlocked">
@@ -89,8 +89,10 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { getRandom, unstub, stub } from "@/App.vue";
 import { ref, set } from "firebase/database";
+import { Getter, Mutation } from "vuex-class";
+import { Country, QuizQuestionIndices } from "@/interfaces";
 
-const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
+const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): QuizQuestionIndices[] => {
   let indices = [];
   if (pickedIndices.length > 0) {
     indices = pickedIndices;
@@ -106,12 +108,17 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
 
   const result = indices.map((i, j) => {
     const c = pool[i];
-    const answers = [Object.assign({}, c, { isCorrect: true })];
-    let wrongAnswerIndices = [];
+    // const answers = [Object.assign(c, { isCorrect: true })];
+    // const answers = [c];
+    let wrongAnswerIndices = [i];
+
+    // - [ ] TODO
+    // Ahhh right if only 3, first one is not guaranteed to be correct
+    // bug where  all can be same???
 
     if (pool.length < 4) {
       wrongAnswerIndices = indices.slice(0);
-      wrongAnswerIndices.splice(j, 1);
+      //   wrongAnswerIndices.splice(j, 1);
     } else {
       while (wrongAnswerIndices.length < 3) {
         const x = getRandom(0, pool.length);
@@ -122,15 +129,17 @@ const generateQuiz = (pool: any[], maxNum: number, pickedIndices = []) => {
     }
 
     // add 3 wrong answers
-    wrongAnswerIndices.forEach((k) => {
-      const c = pool[k];
-      const wrongAnswer = Object.assign({}, c, { isCorrect: false });
-      answers.push(wrongAnswer);
-    });
+    // wrongAnswerIndices.forEach((k) => {
+    //   const c = pool[k];
+    //   //   const wrongAnswer = Object.assign(c, { isCorrect: false });
+    //   const wrongAnswer = c;
+    //   answers.push(wrongAnswer);
+    // });
 
-    return answers; // TODO: scramble them
+    return { countryIndex: i, answerIndices: wrongAnswerIndices, subregion: c.subregion }; // TODO: scramble them
   });
 
+  //   return { questions: result };
   return result;
 };
 
@@ -157,18 +166,6 @@ const REGIONS = [
   },
 ];
 
-// Must have reviewed X number in past however long duration?
-
-// Must NOT  have any that have  NOT been reviwed for some duration?
-
-// You'll want to tinker with  this.....because MAIN GOAL FOR THIS APP
-// is to ensure that I am forced to review things thoroughly before going on to grab more to learn.
-// The POINT is gatekeeping and game-ifying the whole "unlocking new flags" process.
-// FORCING review first.
-
-// First element in NUMBER_REVIEWS means have 0-2 unlocked, need 0 successes
-// Second means have 3-5 unlocked, need 6 successes to unlock more
-
 // Definitely tinker -- a lot of subregions have less than 15 flags
 const UNLOCK_COUNTRIES_RULES = {
   NUMBER_REVIEWS: [0, 6, 15, 25, 40, 60, 80, 100, 120, 160, 200],
@@ -177,74 +174,15 @@ const UNLOCK_COUNTRIES_RULES = {
 
 export const NEW_FLAGS_AMOUNT = 3;
 
-// - [ ] TODO: show number of unlocked flags out of total for each subregion
-
-// - [ ] TODO: add tailwind --  just do when....
-// - [ ] TODO : add vuex. HOPEFULLY deal with nested/reactivity issue
-
-// - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
-
-// If looking for a detour -- get into Maps
-
-// - [ ] TODO: think about how to  let other people use. browser/ip or somethinng as ID?
-// Or just make an auth flow?
-// If you host on Heroku will the 10 seconds to load be annoying?
-// Can you deploy server-side with "now"??
-// just liike "enter your username"????
-
-// - [ ] TODO: Sort countries within subregion in MyFlags by whether isUnlocked
-
-// - [ ] TODO: show indicator that flag image is loading (or maybe it was just broken in non-dev view)
-
-// - [ ] TODO: show flags against a background color??
-// - [ ] TODO: Bigger flag in quiz, fix background color....somehow
-
-// - [ ] TODO: swap answers! lol
-
-// - [ ] TODO: visual indicatioin of wrong answer
-
-// - [ ] TODO: indication that you can unlock flags? after you review enough
-// - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
-
-// - [ ] TODO: from game perspective, there should be motivev to review flags from subregion yu have unlocked all flags for
-// Maybe you need to review all flags from  REGION within a day?
-
-// - [ ] TODO: button to "flag" a flag as "want extra review" -- then it puts in every quiz  from that subregion
-// Maybe a "i got it" button? to hide from quizzes?
-
-// - [ ] TODO: do not show Unlock flags button if have all flags!
-
-// - [ ] TODO: quiz for region button
-
-// - [ ] TODO: tinker with unlock rules params
-
-// - [ ] TODO: hide flag completely  if locked, not just opacity
-
-// - [ ] TODO: hover flag increases scale? not sure. Because, can you click it??
-
-// - [ ] TODO: re-imagine "numCorrect" as like...XP somehow? Just game-ify
-
-// - [ ] TODO: ensure stuff never overflows modals
-
-// - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
-
-// - [ ] TODO: subregions, and prob regions should be Accordions.
-
-// - [ ] TODO: flags do not show up in quiz in non-dev view
-
-// - [ ] TODO: think about quiz params -- flagFirst??
-
-// - [ ] TODO: main text could be smalller....toggle for size somewhere?
-
-// - [ ] TODO: Unlock subregions not working.....?
-// Oh no it is. We let  you unlock new continents for free right now.
-
 @Component({
   components: {},
 })
 export default class MyFlagsComponent extends Vue {
-  @Prop() readonly subregionCountries: any[];
+  //   @Prop() readonly subregionCountries: any[];
+  @Getter subregionCountries: any[];
   @Prop() db: any;
+  @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
+
   regions = REGIONS;
 
   numberWithCommas(x) {
@@ -257,8 +195,9 @@ export default class MyFlagsComponent extends Vue {
 
   takeQuiz(subregion: string) {
     const unlockedCountries = this.getCountries(subregion).filter((c) => c.isUnlocked);
-    const quiz = generateQuiz(unlockedCountries, 5);
-    this.$emit("quizQuestions", quiz);
+    const quiz = generateQuizIndices(unlockedCountries, 5);
+    console.log("new quiz", quiz);
+    this.setQuizIndices(quiz);
   }
 
   unlockSubregion(subregion: string) {
@@ -381,6 +320,7 @@ export default class MyFlagsComponent extends Vue {
 
   getCountries(subregion: string) {
     if (this.subregionCountries.length === 0) return [];
+    // console.log("get countries...", this.subregionCountries.find((c) => c.name === subregion).countries);
     return this.subregionCountries.find((c) => c.name === subregion).countries;
   }
 
@@ -388,30 +328,23 @@ export default class MyFlagsComponent extends Vue {
     return this.getCountries(subregion).filter((c) => c.isUnlocked);
   }
 
+  hasLockedCountries(subregion: string) {
+    return !this.getCountries(subregion).every((c) => c.isUnlocked);
+  }
+
   // -[x] TODO: sort so that subregions with unlocked flags are always on top
   // No idea why this triggers infinite loop error...because no slice!
   sortSubregions(subregions) {
-    return subregions.slice(0).sort((a: any, b: any) => {
+    return subregions.slice(0).sort((a, b) => {
       return this.getUnlockedCountries(b).length - this.getUnlockedCountries(a).length;
     });
   }
 
-  //   getMostRecentlyReviewedCountries() {}
-
-  //   // Only need this for case user unlocks but doesn't review......which we do care about because we say "unlocked"
-  //   getMostRecentlyUnlockedCountries() {}
-
-  //   getCountriesWithMissesInSubregion(subregion: string) {
-  //     // Good for populating quiz of "try again" flags
-  //   }
-
-  //   getTotalSuccessesInSubregion(subregion: string) {
-  //     // Should sum how many times each country/flag in the subregion has been successfully reviewed
-  //   }
-
-  //   getTotalReviewsInSubregion(subregion: string) {
-  //     // Should sum how many times each country/flag in the subregion has been reviewed
-  //   }
+  sortCountries(countries) {
+    return countries.slice(0).sort((a, b) => {
+      return a.isUnlocked && b.isUnlocked ? 0 : a.isUnlocked ? -1 : 1;
+    });
+  }
 }
 </script>
 
