@@ -144,6 +144,13 @@ export default class App extends Vue {
         })
       );
 
+      console.log(
+        "sub",
+        Object.keys(allSubregions).map((name) => {
+          return { name, values: allSubregions[name] };
+        })
+      );
+
       // ==================
       // TESTING:
       // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
@@ -183,7 +190,7 @@ img {
 button {
   font-size: 0.8rem;
   padding: 0.4rem;
-  margin: 0.5rem 0;
+  /* margin: 0.5rem 0; */
   border-radius: 0.2rem;
   appearance: none;
   background: rgb(16, 185, 129);

@@ -2,22 +2,30 @@
   <div>
     <div class="modal"></div>
     <div class="modal-inner" ref="inner">
-      <!-- <div style="font-size:3rem;">Test your Knowledge</div> -->
-      <div style="font-size:3rem;">Can you identify this flag?</div>
+      <div v-if="complete">Well done!!!</div>
 
-      <div style="font-size:1.5rem; margin:2rem 0;">Question {{ questionIndex + 1 }} of {{ quiz.length }}</div>
+      <div class="quiz" v-else>
+        <!-- <div style="font-size:3rem;">Test your Knowledge</div> -->
+        <div style="font-size:3rem;">Can you identify this flag?</div>
 
-      <div
-        v-if="flagFirst"
-        class="flag-image"
-        :style="{ backgroundImage: 'url(' + currentQuestion.country.flag + ')' }"
-      ></div>
-      <div style="font-size:5rem;" v-else>{{ currentQuestion.country.name }}</div>
+        <div style="font-size:1.5rem; margin:2rem 0;">Question {{ questionIndex + 1 }} of {{ quiz.length }}</div>
 
-      <div class="answers">
-        <div v-for="(answer, i) in currentQuestion.answers" :key="i" class="answer" @click="answerClick(answer)">
-          <div v-if="flagFirst">{{ answer.name }}</div>
-          <div v-else class="answer-flag" :style="{ backgroundImage: 'url(' + answer.flag + ')' }"></div>
+        <div
+          v-if="flagFirst"
+          class="flag-image"
+          :style="{ backgroundImage: 'url(' + currentQuestion.country.flag + ')' }"
+        ></div>
+        <div style="font-size:5rem;" v-else>{{ currentQuestion.country.name }}</div>
+
+        <div class="message" :style="{ color: feedback.isError ? 'red' : 'green', margin: '1rem 0' }">
+          {{ feedback.message }}
+        </div>
+
+        <div class="answers">
+          <div v-for="(answer, i) in currentQuestion.answers" :key="i" class="answer" @click="answerClick(answer)">
+            <div v-if="flagFirst">{{ answer.name }}</div>
+            <div v-else class="answer-flag" :style="{ backgroundImage: 'url(' + answer.flag + ')' }"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -42,6 +50,13 @@ export default class QuizComponent extends Vue {
 
   @Getter quiz: QuizQuestion[];
   @Prop() db: any;
+
+  feedback = {
+    isError: false,
+    message: "Choose an answer.",
+  };
+
+  complete = false;
 
   questionIndex = 0;
   answeredWrong = false; // controls whether "try again" modal/message shows
@@ -79,6 +94,10 @@ export default class QuizComponent extends Vue {
 
     if (answer.name === questionCountry.name) {
       console.log("correct!");
+
+      this.feedback.isError = false;
+      this.feedback.message = "Choose an answer.";
+
       info.numCorrect += 1;
       if (this.questionIndex < this.quiz.length - 1) {
         // Not yet last one
@@ -87,7 +106,11 @@ export default class QuizComponent extends Vue {
         // Last one --
         // TODO: must close out the quiz
         console.log("done!");
+        this.complete = true;
       }
+    } else {
+      this.feedback.isError = true;
+      this.feedback.message = "Shoot, that's not correct. Try again!";
     }
     info.numAttempts += 1;
     console.log("set with info", info.numCorrect, info.numAttempts);
@@ -107,7 +130,7 @@ export default class QuizComponent extends Vue {
 
 .flag-image {
   height: 60vh;
-  background-color: lightblue;
+  background-color: gray;
 }
 
 .answer-flag {
@@ -115,10 +138,12 @@ export default class QuizComponent extends Vue {
 }
 
 .quiz {
-  /* display: flex;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
-  padding: 1rem 3rem; */
 }
 
 .answers {

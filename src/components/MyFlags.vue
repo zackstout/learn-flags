@@ -3,6 +3,10 @@
     <div v-for="region in regions" :key="region.name" class="region">
       <h2>{{ region.name }}</h2>
 
+      <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
+        Review Region
+      </button>
+
       <div v-for="subregion in sortSubregions(region.subregions)" :key="subregion" class="subregion">
         <h3>{{ subregion }}</h3>
 
@@ -10,18 +14,33 @@
 
         <div v-if="getUnlockedCountries(subregion).length > 0">
           <div style="display:flex; flex-direction:column;">
+            <div style="display:flex;align-items:center">
+              <span style="margin-right:0.5rem;">
+                Total unlocked: {{ totalUnlocked(subregion) }} / {{ getCountries(subregion).length }}
+              </span>
+              <span v-if="!hasLockedCountries(subregion)"
+                ><svg height="25" width="23" fill="gold" data-rating="1">
+                  <polygon
+                    points="9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78"
+                    style="fill-rule:nonzero;"
+                  /></svg
+              ></span>
+            </div>
+
+            <div>Total reviews: {{ numSuccesses(getCountries(subregion)) }} / {{ totalReviews(subregion) }}</div>
+
             <div style="display:flex; align-items:center;" v-if="hasLockedCountries(subregion)">
               <button
                 :disabled="unlockFlagsDisabled(subregion).value"
                 @click="unlockFlags(subregion)"
-                style="background-color: rgb(59, 130, 246); width:8rem;"
+                style="background-color: rgb(59, 130, 246); width:8rem; margin: 0.5rem 0;"
               >
                 Unlock Flags
               </button>
               <div style="color:gray; margin-left:1rem;">{{ unlockFlagsDisabled(subregion).message }}</div>
             </div>
 
-            <button @click="takeQuiz(subregion)" style="width:8rem;">
+            <button @click="takeQuiz(subregion)" style="width:8rem; margin: 0.5rem 0;">
               Review
             </button>
           </div>
@@ -55,8 +74,9 @@
               </div>
 
               <div
+                class="flag-img"
                 :style="{
-                  backgroundImage: 'url(' + country.flag + ')',
+                  backgroundImage: country.isUnlocked ? 'url(' + country.flag + ')' : '',
                   backgroundColor: 'gray',
                   width: '10vw',
                   height: '10vh',
@@ -64,7 +84,6 @@
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
                   marginTop: '10px',
-                  opacity: country.isUnlocked ? '1' : '0.2', // or just gray out entirely? placeholder?
                 }"
               ></div>
             </div>
@@ -75,7 +94,7 @@
           <button
             :disabled="unlockSubregionDisabled(subregion)"
             style="margin-left:1rem; background-color:gold;"
-            @click="unlockSubregion(subregion)"
+            @click="unlockFlags(subregion)"
           >
             Unlock subregion
           </button>
@@ -92,54 +111,60 @@ import { ref, set } from "firebase/database";
 import { Getter, Mutation } from "vuex-class";
 import { Country, QuizQuestionIndices } from "@/interfaces";
 
+const fillWithRandomIndices = (arr, targetLen, poolLen, cannotInclude?) => {
+  while (arr.length < targetLen) {
+    const r = getRandom(0, poolLen);
+    if (!arr.includes(r) && (cannotInclude ? r !== cannotInclude : true)) {
+      arr.push(r);
+    }
+  }
+};
+
 const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): QuizQuestionIndices[] => {
+  const unlockedCountries = pool.filter((c) => c.isUnlocked);
+
   let indices = [];
   if (pickedIndices.length > 0) {
     indices = pickedIndices;
   } else {
-    const targetLen = Math.min(pool.length, maxNum);
-    while (indices.length < targetLen) {
-      const r = getRandom(0, pool.length);
-      if (!indices.includes(r)) {
-        indices.push(r);
-      }
-    }
+    const targetLen = Math.min(unlockedCountries.length, maxNum);
+    fillWithRandomIndices(indices, targetLen, unlockedCountries.length);
   }
 
   const result = indices.map((i, j) => {
-    const c = pool[i];
-    // const answers = [Object.assign(c, { isCorrect: true })];
-    // const answers = [c];
     let wrongAnswerIndices = [i];
-
     // - [ ] TODO
     // Ahhh right if only 3, first one is not guaranteed to be correct
     // bug where  all can be same???
+    // Right............no guarantee that these indices (in pool passed  in)
+    // wwill match up to how they appear in subregionCountries, whicch is what is  used for Quiz getter...
 
-    if (pool.length < 4) {
+    // yeah, big issue
+    // only working for regions with alll countries unllocked haha
+    // Fix could be.... look  up c = pool[i] here, and then llook up its index within the actual subregionCounntries array.
+
+    if (unlockedCountries.length < 4) {
       wrongAnswerIndices = indices.slice(0);
       //   wrongAnswerIndices.splice(j, 1);
     } else {
-      while (wrongAnswerIndices.length < 3) {
-        const x = getRandom(0, pool.length);
-        if (!wrongAnswerIndices.includes(x) && x !== i) {
-          wrongAnswerIndices.push(x);
-        }
-      }
+      fillWithRandomIndices(wrongAnswerIndices, 3, unlockedCountries.length, i);
     }
 
-    // add 3 wrong answers
-    // wrongAnswerIndices.forEach((k) => {
-    //   const c = pool[k];
-    //   //   const wrongAnswer = Object.assign(c, { isCorrect: false });
-    //   const wrongAnswer = c;
-    //   answers.push(wrongAnswer);
-    // });
+    const answerIndices = wrongAnswerIndices.map((i) => {
+      const country = unlockedCountries[i];
+      return pool.findIndex((x) => x.name === country.name);
+    });
 
-    return { countryIndex: i, answerIndices: wrongAnswerIndices, subregion: c.subregion }; // TODO: scramble them
+    const c = unlockedCountries[i];
+    const countryIndex = pool.findIndex((x) => x.name === c.name);
+
+    return {
+      countryIndex: countryIndex,
+      answerIndices: answerIndices,
+      subregion: c.subregion,
+    }; // TODO: scramble them
   });
 
-  //   return { questions: result };
   return result;
 };
 
@@ -185,23 +210,30 @@ export default class MyFlagsComponent extends Vue {
 
   regions = REGIONS;
 
-  numberWithCommas(x) {
+  numberWithCommas(x: number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  unstubInner(x) {
+  unstubInner(x: string) {
     return unstub(x);
   }
 
-  takeQuiz(subregion: string) {
-    const unlockedCountries = this.getCountries(subregion).filter((c) => c.isUnlocked);
-    const quiz = generateQuizIndices(unlockedCountries, 5);
+  takeQuiz(region: string) {
+    // const regionFound = REGIONS.find((x) => x.name === region);
+    // if (regionFound) {
+    //   // We actually have a REGION
+    //   unlockedCountries = (regionFound.subregions as string[]).reduce((acc, subregion) => {
+    //     return acc.concat(this.getCountries(subregion));
+    //   }, []);
+    // } else {
+    //   unlockedCountries = this.getCountries(region).filter((c) => c.isUnlocked);
+    // }
+
+    // const unlockedCountries=this.getCountries(region).filter(c=>c.isUnlocked);
+
+    const quiz = generateQuizIndices(this.getCountries(region), 5);
     console.log("new quiz", quiz);
     this.setQuizIndices(quiz);
-  }
-
-  unlockSubregion(subregion: string) {
-    this.unlockFlags(subregion);
   }
 
   unlockFlags(subregion: string) {
@@ -318,10 +350,18 @@ export default class MyFlagsComponent extends Vue {
       .every((countries) => countries.every((c) => c.isUnlocked));
   }
 
-  getCountries(subregion: string) {
+  getCountries(region: string) {
     if (this.subregionCountries.length === 0) return [];
-    // console.log("get countries...", this.subregionCountries.find((c) => c.name === subregion).countries);
-    return this.subregionCountries.find((c) => c.name === subregion).countries;
+
+    const regionFound = REGIONS.find((x) => x.name === region);
+    if (regionFound) {
+      // We actually have a REGION
+      return (regionFound.subregions as string[]).reduce((acc, subregion) => {
+        return acc.concat(this.getCountries(subregion));
+      }, []);
+    }
+
+    return this.subregionCountries.find((c) => c.name === region).countries;
   }
 
   getUnlockedCountries(subregion: string) {
@@ -344,6 +384,16 @@ export default class MyFlagsComponent extends Vue {
     return countries.slice(0).sort((a, b) => {
       return a.isUnlocked && b.isUnlocked ? 0 : a.isUnlocked ? -1 : 1;
     });
+  }
+
+  totalReviews(subregion: string) {
+    const countries = this.getCountries(subregion);
+    return countries.reduce((acc, country) => acc + country.numAttempts, 0);
+  }
+
+  totalUnlocked(subregion: string) {
+    const countries = this.getCountries(subregion);
+    return countries.filter((country) => country.isUnlocked).length;
   }
 }
 </script>
@@ -371,5 +421,13 @@ export default class MyFlagsComponent extends Vue {
 
 .country {
   margin: 0 2rem 2rem 0;
+}
+
+.flag-img {
+  opacity: 0.9;
+}
+
+.flag-img:hover {
+  opacity: 1;
 }
 </style>

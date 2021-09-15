@@ -1,42 +1,57 @@
 
-
-
 // NOTE: This is one that we can "take all the way"
 // So many "apps"  I've started and left half-done
 // I think this is one we can "finish" and polish
 
+// ============================================
+
+// [x] todo: actually fix quiz indices functionality (broken because pulliing inddce of filtered list)
+// - [ ] TODO: quiz for region button
+//  Hmm.....getting abit ugly....must fix quiz Getter
+/// [x] could help a  lot if getCountries haandled regoin /subregion
+
 // - [ ] TODO: show flags against a background color??
-// - [x] TODO: Bigger flag in quiz
-// - [x] TODO: flags do not show up in quiz in non-dev view
 
-// - [ ] TODO: modal shoudl take up wholle screen (or at least hide flags)
+// - [ ] TODO: modal should take up whole screen (or at least hide flags)
 // ahhh yeah why is it shifted down right????
-
-// - [x] TODO: fix vuex issue with quiz questionsupdatiing
-
-// - [ ] TODO: show number of unlocked flags out of total for each subregion
 
 // - [ ] TODO: swap answers! lol
 
-// - [ ] TODO: visual indication of wrong answer
-
 // - [ ] TODO: indication that you can unlock flags? after you review enough
 // - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
-
-// - [ ] TODO: quiz for region button
+// Click for another quiz?
 
 // - [ ] TODO: ensure stuff never overflows modals
 
+// todo: handle "must have reviewed all in last day" thing
+
+// todo: do not hover buttons opacity if disabeld
+
+// todo: build borders display (show tiny flags for countries it borders!)
+
+// todo: fun to show languages too -- maybe currencies, maybe area?
+
 // - [x] TODO: Sort countries within subregion in MyFlags by whether isUnlocked
 // - [x] TODO: do not show Unlock flags button if have all flags!
+// - [x] TODO: Bigger flag in quiz
+// - [x] TODO: flags do not show up in quiz in non-dev view
+// - [x] TODO: fix vuex issue with quiz questionsupdatiing
+// - [x] TODO : add vuex. HOPEFULLY deal with nested/reactivity issue
+// - [x] TODO: visual indication of wrong answer
+// - [x] TODO: show number of unlocked flags out of total for each subregion
+// - [x] TODO: hide flag completely  if locked, not just opacity
+// - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
+// - [x] add star if have unlocked all in subregion
+// - [x] move fillWithRandomIndices to fn
 
-// - [ ] TODO: from game perspective, there should be motivev to review flags from subregion yu have unlocked all flags for
+
+// THINK ABOUT:
+// ===================================
+
+// - [ ] TODO: from game perspective, there should be motive to review flags from subregion yu have unlocked all flags for
 // Maybe you need to review all flags from  REGION within a day?
 
-// - [ ] TODO: add tailwind --  just do when....
-// - [ ] TODO : add vuex. HOPEFULLY deal with nested/reactivity issue
-
-// - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
+// - [?] TODO: feedback message coulld track more, like "got all right so far",  "almost done", etc.
 
 // If looking for a detour -- get into Maps
 
@@ -46,32 +61,60 @@
 // Can you deploy server-side with "now"??
 // just liike "enter your username"????
 
+// - [ ] TODO: re-imagine "numCorrect" as like...XP somehow? Just game-ify
+
+// - [ ] TODO: think about quiz params -- flagFirst??
+
+
+// should nnot have any with uder 50% succceses rate? before can unlock more flags? (a fourth thing)
+
+// - [ ] TODO: tinker with unlock rules params
+
+
+
+
+/*
+Quiz pool answers.....
+
+Hard because....don't want to be too easy for subregion quiz (eliminate "Brazil" because it's "Southeast Asia")
+OR eliminate X becaus I have not unlocked it yet.
+
+But also...if only like 5 in subregion, or unlocked, then the pool is very small.
+And you can eliminate ones you've already seen in the quiz.
+
+Tricky...
+
+Just kind of hoping that Region quizzes are harder?
+And then world quiz itself will for sure be hard.
+
+
+*/
+
+
+
+
+
+
+// LOWER PRIORITY:
+// ===================================
+
+// - [ ] TODO: add tailwind
+
+// - [ ] TODO: it will be FUN to go through and try to make it look halfway decent
+
 // - [ ] TODO: show indicator that flag image is loading (or maybe it was just broken in non-dev view)
 
 // - [ ] TODO: button to "flag" a flag as "want extra review" -- then it puts in every quiz  from that subregion
 // Maybe a "i got it" button? to hide from quizzes?
 
-// - [ ] TODO: tinker with unlock rules params
-
-// - [ ] TODO: hide flag completely  if locked, not just opacity
-
 // - [ ] TODO: hover flag increases scale? not sure. Because, can you click it??
-
-// - [ ] TODO: re-imagine "numCorrect" as like...XP somehow? Just game-ify
-
-// - [x] TODO: for locked, show "Capital: ???" or just "???" ? lean toward just "???"
 
 // - [ ] TODO: subregions, and prob regions should be Accordions.
 
-// - [ ] TODO: think about quiz params -- flagFirst??
+// - [ ] TODO: main text could be smaller....toggle for size somewhere?
 
-// - [ ] TODO: main text could be smalller....toggle for size somewhere?
-
-// - [ ] TODO: Unlock subregions not working.....?
+// - [x] TODO: Unlock subregions not working.....?
 // Oh no it is. We let  you unlock new continents for free right now.
-
-
-
 
 
 
