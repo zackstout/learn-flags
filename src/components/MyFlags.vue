@@ -66,18 +66,18 @@
                 <div v-else>???</div>
               </div>
 
-              <div>
+              <!-- <div>
                 <div v-if="country.isUnlocked">
                   <span style="font-weight:bold;">Population:</span>&emsp;<span>{{
                     numberWithCommas(country.population)
                   }}</span>
                 </div>
                 <div v-else>???</div>
-              </div>
+              </div> -->
 
               <div>
                 <div v-if="country.isUnlocked">
-                  <span style="font-weight:bold;">Alpha3:</span>&emsp;<span>{{ country.alpha3Code }}</span>
+                  <span style="font-weight:bold;">Alpha3:</span>&emsp;<span>{{ country.code3 }}</span>
                 </div>
                 <div v-else>???</div>
               </div>
@@ -94,7 +94,7 @@
               <div
                 class="flag-img"
                 :style="{
-                  backgroundImage: country.isUnlocked ? 'url(' + country.flag + ')' : '',
+                  backgroundImage: country.isUnlocked ? getBgImage(country) : '',
                   width: '10vw',
                   height: '10vh',
                   backgroundSize: 'contain',
@@ -107,7 +107,7 @@
             </div>
           </div>
 
-          <div>
+          <!-- <div>
             <svg width="600" height="400">
               <path
                 v-for="(geom, i) in allGeoms"
@@ -116,7 +116,7 @@
                 :fill="getPath(geom, subregion).fill"
               />
             </svg>
-          </div>
+          </div> -->
         </div>
         <div v-else>
           <!-- <span>Subregion locked.</span> -->
@@ -172,7 +172,8 @@ const generateQuizIndices = (pool: any[], maxNum: number, pickedIndices = []): Q
       wrongAnswerIndices = indices.slice(0);
       //   wrongAnswerIndices.splice(j, 1);
     } else {
-      fillWithRandomIndices(wrongAnswerIndices, 3, unlockedCountries.length, i);
+      // huh...not sure why was passing 3 as tgt length...
+      fillWithRandomIndices(wrongAnswerIndices, 4, unlockedCountries.length, i);
     }
 
     const answerIndices = wrongAnswerIndices.map((i) => {
@@ -245,6 +246,10 @@ export default class MyFlagsComponent extends Vue {
     if (!this.worldMapData) return [];
     // @ts-ignore
     return topojson.object(this.worldMapData, this.worldMapData.objects.countries).geometries;
+  }
+
+  getBgImage(country) {
+    return "url(" + require(`@/images/svg/${country.code3.toLowerCase()}.svg`) + ")";
   }
 
   mounted() {
@@ -445,6 +450,16 @@ export default class MyFlagsComponent extends Vue {
 
   // ================================
 
+  get path() {
+    // NOTE: only need once
+    var projection = d3
+      .geoMercator()
+      .scale(80)
+      .center([150, 35]);
+    var path = d3.geoPath().projection(projection);
+    return path;
+  }
+
   getPath(geom: any, subregion: string) {
     const { id } = geom;
 
@@ -467,21 +482,15 @@ export default class MyFlagsComponent extends Vue {
         fill = "gold";
       }
 
-      if (this.hoveredAlpha3 === alpha3) {
-        fill = "red";
-      }
+      // Kinda works, but is very slow:
+      // if (this.hoveredAlpha3 === alpha3) {
+      //   fill = "red";
+      // }
     }
-
-    // TODO: only need once
-    var projection = d3
-      .geoMercator()
-      .scale(80)
-      .center([150, 35]);
-    var path = d3.geoPath().projection(projection);
 
     return {
       fill,
-      d: path(geom),
+      d: this.path(geom),
     };
   }
 }

@@ -2,18 +2,28 @@
   <div>
     <div class="modal"></div>
     <div class="modal-inner" ref="inner">
-      <div v-if="complete">Well done!!!</div>
+      <div v-if="complete">
+        <div>Well done!</div>
+      </div>
 
       <div class="quiz" v-else>
         <!-- <div style="font-size:3rem;">Test your Knowledge</div> -->
         <div style="font-size:3rem;">Can you identify this flag?</div>
 
-        <div style="font-size:1.5rem; margin:2rem 0;">Question {{ questionIndex + 1 }} of {{ quiz.length }}</div>
+        <div style="font-size:1.5rem; margin:2rem 0; display:flex;">
+          <!-- <span>Question {{ questionIndex + 1 }} of {{ quiz.length }}</span> -->
+          <div
+            v-for="(x, i) in [...new Array(quiz.length)]"
+            :key="i"
+            style="width:8rem; margin: 0.2rem; background: blue; height: 0.8rem;"
+            :style="{ opacity: questionIndex > i ? 1 : 0.3 }"
+          ></div>
+        </div>
 
         <div
           v-if="flagFirst"
           class="flag-image"
-          :style="{ backgroundImage: 'url(' + currentQuestion.country.flag + ')' }"
+          :style="{ backgroundImage: getBgImage(currentQuestion.country) }"
         ></div>
         <div style="font-size:5rem;" v-else>{{ currentQuestion.country.name }}</div>
 
@@ -60,6 +70,10 @@ export default class QuizComponent extends Vue {
 
   questionIndex = 0;
   answeredWrong = false; // controls whether "try again" modal/message shows
+
+  getBgImage(country) {
+    return "url(" + require(`@/images/svg/${country.code3.toLowerCase()}.svg`) + ")";
+  }
 
   mounted() {
     // console.log("mount qz", this.questions.slice(0));

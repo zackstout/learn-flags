@@ -9,6 +9,20 @@
 
 // ============================================
 
+// - [x] TODO: Find new data source (preferably stored locally) because our url broke
+
+// - [x] TODO/BUG: quiz only getting 3 answers...
+
+// - [ ] TODO: swap answers! lol
+
+// - [ ] TODO: quiz progress
+
+// - [ ] TODO: work on quiz done page
+// - [ ] TODO: indication that you can unlock flags? after you review enough
+// - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
+// - [ ] TODO: for another quiz?
+
+
 // - [ ] TODO: quiz for region button
 //  Hmm.....getting abit ugly....must fix quiz Getter
 
@@ -16,6 +30,8 @@
 // This means we wannt t o store when a flag was unlocked.
 // Handle that with the time stuff..
 
+
+// todo: show emojis of flags (as they show up on chess.com)
 
 // maybe map would look better AFTER flags within subregion?
 
@@ -36,14 +52,8 @@
 // - [ ] TODO: modal should take up whole screen (or at least hide flags)
 // ahhh yeah why is it shifted down right????
 
-// - [ ] TODO: swap answers! lol
-
 // - [ ] TODO: also show totals for unlocked/reviews for regions
 
-// - [ ] TODO: work on quiz done page
-// - [ ] TODO: indication that you can unlock flags? after you review enough
-// - [ ] TODO: end of quiz view (maybe goes with previous one -- yeah I like it)
-// - [ ] TODO: for another quiz?
 
 // - [ ] TODO: ensure stuff never overflows modals
 

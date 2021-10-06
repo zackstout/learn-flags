@@ -17,9 +17,9 @@
           <h4>Region: {{ currentCountry.region }}</h4>
           <h5>Subregion: {{ currentCountry.subregion }}</h5>
           <h5>Capital: {{ currentCountry.capital }}</h5>
-          <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5>
+          <!-- <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5> -->
         </div>
-        <div class="flag" :style="{ backgroundImage: 'url(' + currentCountry.flag + ')' }"></div>
+        <div class="flag" :style="{ backgroundImage: getBgImage(currentCountry) }"></div>
       </div>
     </div>
   </div>
@@ -49,6 +49,10 @@ export default class LearnFlagsComponent extends Vue {
 
   unstubInner(x) {
     return x ? unstub(x) : "";
+  }
+
+  getBgImage(country) {
+    return "url(" + require(`@/images/svg/${country.code3.toLowerCase()}.svg`) + ")";
   }
 
   mounted() {

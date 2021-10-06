@@ -56,6 +56,8 @@ export const getRandom = (min, max) => {
   return min + Math.floor(Math.random() * (max - min));
 };
 
+import * as data from "./countries.json";
+
 @Component({
   components: {
     Quiz,
@@ -111,7 +113,7 @@ export default class App extends Vue {
     onValue(ref(db, "countries"), (snapshot) => {
       const data = snapshot.val();
 
-      console.log("snapshot"); // only called on first answer click....
+      // console.log("snapshot"); // only called on first answer click....
 
       this.setDatabaseCountries(
         Object.keys(data).map((name) => {
@@ -123,42 +125,64 @@ export default class App extends Vue {
       // this.setupMap();
     });
 
+    // TODO:  Just store this data in a file yourself
+
     // Transform data for markup to consume:
     const allSubregions = {};
-    //@ts-ignore
-    axios.get("https://restcountries.eu/rest/v2/").then((res) => {
-      res.data.forEach((row) => {
-        if (!allSubregions.hasOwnProperty(row.subregion)) {
-          allSubregions[row.subregion] = [];
-        }
-        allSubregions[row.subregion].push(row);
 
-        // Only needed once to init database:
-        // this.initData(row);
-      });
+    const brokenUrl = "https://restcountries.eu/rest/v2/";
+    const url = "https://github.com/stefangabos/world_countries/blob/master/data/en/countries.json";
 
-      // this.allSubregions = Object.keys(allSubregions).map((name) => {
-      //   return { name, values: allSubregions[name] };
-      // });
-      this.setSubregions(
-        Object.keys(allSubregions).map((name) => {
-          return { name, values: allSubregions[name] };
-        })
-      );
+    console.log("countries..", data);
 
-      // console.log(
-      //   "sub",
-      //   Object.keys(allSubregions).map((name) => {
-      //     return { name, values: allSubregions[name] };
-      //   })
-      // );
-
-      // ==================
-      // TESTING:
-      // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
-      // this.quizQuestions = quiz;
-      // this.newFlags = this.subregionCountries[0].countries;
+    data.forEach((country) => {
+      // console.log("c", country.name);
+      if (!allSubregions.hasOwnProperty(country.subregion)) {
+        allSubregions[country.subregion] = [];
+      }
+      allSubregions[country.subregion].push(country);
     });
+
+    this.setSubregions(
+      Object.keys(allSubregions).map((name) => {
+        return { name, values: allSubregions[name] };
+      })
+    );
+
+    //@ts-ignore
+    // axios.get(url).then((res) => {
+    //   res.data.forEach((row) => {
+    //     if (!allSubregions.hasOwnProperty(row.subregion)) {
+    //       allSubregions[row.subregion] = [];
+    //     }
+    //     allSubregions[row.subregion].push(row);
+
+    //     // Only needed once to init database:
+    //     // this.initData(row);
+    //   });
+
+    //   // this.allSubregions = Object.keys(allSubregions).map((name) => {
+    //   //   return { name, values: allSubregions[name] };
+    //   // });
+    //   this.setSubregions(
+    //     Object.keys(allSubregions).map((name) => {
+    //       return { name, values: allSubregions[name] };
+    //     })
+    //   );
+
+    //   // console.log(
+    //   //   "sub",
+    //   //   Object.keys(allSubregions).map((name) => {
+    //   //     return { name, values: allSubregions[name] };
+    //   //   })
+    //   // );
+
+    //   // ==================
+    //   // TESTING:
+    //   // const quiz = generateQuiz(this.subregionCountries[0].countries.slice(0, 3), 5);
+    //   // this.quizQuestions = quiz;
+    //   // this.newFlags = this.subregionCountries[0].countries;
+    // });
   }
 }
 </script>
