@@ -72,6 +72,7 @@ export default class QuizComponent extends Vue {
   answeredWrong = false; // controls whether "try again" modal/message shows
 
   getBgImage(country) {
+    console.log("getbg", country);
     return "url(" + require(`@/images/svg/${country.code3.toLowerCase()}.svg`) + ")";
   }
 
@@ -83,6 +84,7 @@ export default class QuizComponent extends Vue {
   }
 
   get currentQuestion(): QuizQuestion {
+    console.log("get cq", this.quiz.length, this.quiz[this.questionIndex]);
     if (this.quiz.length === 0) return { country: null, answers: [] };
     return this.quiz[this.questionIndex];
   }

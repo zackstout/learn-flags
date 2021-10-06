@@ -12,6 +12,7 @@ const store = new Vuex.Store({
         databaseCountries: [],
         subregions: [],
         quizIndices: [],
+        quizPool: [],
         hoveredAlpha3: ""
     },
     getters: {
@@ -30,27 +31,33 @@ const store = new Vuex.Store({
             return x;
         },
 
-        // TODO: must account for region-level quiizzes..
+        // TODO: must account for region-level quizzes..
         // and likely more (level-based quizzes...)
 
         quiz(state): QuizQuestion[] {
             // Just repeat code for getting subregion countries...Ugly
             if (state.subregions.length === 0 || state.databaseCountries.length === 0) return [];
-            const subregionCountries = state.subregions.map((subregion) => {
-                return {
-                    name: subregion.name,
-                    countries: subregion.values.map((country) => {
-                        let c = state.databaseCountries.find((c) => unstub(c.name) === country.name);
-                        return Object.assign({}, country, c);
-                    }),
-                };
-            });
+
+            // TODO: can't this  take in getters, and use getters.subregionCountries???
+            // const subregionCountries = state.subregions.map((subregion) => {
+            //     return {
+            //         name: subregion.name,
+            //         countries: subregion.values.map((country) => {
+            //             let c = state.databaseCountries.find((c) => unstub(c.name) === country.name);
+            //             return Object.assign({}, country, c);
+            //         }),
+            //     };
+            // });
+
+            const pool = state.quizPool;
 
             return state.quizIndices.map((quizIndices: QuizQuestionIndices) => {
-                const subregion = subregionCountries.find(x => x.name === quizIndices.subregion);
+                // const subregion = subregionCountries.find(x => x.name === quizIndices.subregion);
                 return {
-                    country: subregion.countries[quizIndices.countryIndex],
-                    answers: quizIndices.answerIndices.map(i => subregion.countries[i])
+                    // country: subregion.countries[quizIndices.countryIndex],
+                    // answers: quizIndices.answerIndices.map(i => subregion.countries[i])
+                    country: pool[quizIndices.countryIndex],
+                    answers: quizIndices.answerIndices.map(i => pool[i])
                 }
             });
         }
@@ -66,6 +73,9 @@ const store = new Vuex.Store({
         },
         setQuizIndices(state, questionIndices: QuizQuestionIndices[]) {
             state.quizIndices = questionIndices;
+        },
+        setQuizPool(state, countries: any[]) {
+            state.quizPool = countries;
         },
         setHoveredAlpha3(state, code: string) {
             state.hoveredAlpha3 = code;

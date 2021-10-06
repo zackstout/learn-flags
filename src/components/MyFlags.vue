@@ -3,9 +3,9 @@
     <div v-for="region in regions" :key="region.name" class="region" :id="stubInner(region.name)">
       <div style="font-size:3.5rem; font-weight:bold;">{{ region.name }}</div>
 
-      <!-- <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
+      <button @click="takeQuiz(region.name)" style="width:8rem; background:purple;">
         Review Region
-      </button> -->
+      </button>
 
       <div
         :id="stubInner(subregion)"
@@ -233,7 +233,9 @@ export const NEW_FLAGS_AMOUNT = 3;
 export default class MyFlagsComponent extends Vue {
   @Getter subregionCountries: any[];
   @Prop() db: any;
-  @Mutation setQuizIndices: (x: QuizQuestionIndices[]) => void;
+  @Mutation setQuizIndices: (indices: QuizQuestionIndices[]) => void;
+  @Mutation setQuizPool: (countries: any[]) => void;
+
   @Mutation setHoveredAlpha3: (x: string) => void;
   @State hoveredAlpha3: string;
 
@@ -277,9 +279,11 @@ export default class MyFlagsComponent extends Vue {
   }
 
   takeQuiz(region: string) {
-    const quiz = generateQuizIndices(this.getCountries(region), 5);
+    const pool = this.getCountries(region);
+    const quiz = generateQuizIndices(pool, 5);
     console.log("new quiz", quiz);
     this.setQuizIndices(quiz);
+    this.setQuizPool(pool);
   }
 
   unlockFlags(subregion: string) {
