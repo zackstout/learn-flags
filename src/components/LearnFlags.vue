@@ -11,15 +11,25 @@
         <div class="caret" style="transform:rotate(180deg); margin-left:2rem;" @click="increment">&#12296;</div>
       </div>
 
-      <div class="country">
-        <div>
-          <h1>{{ unstubInner(currentCountry.name) }}</h1>
-          <h4>Region: {{ currentCountry.region }}</h4>
-          <h5>Subregion: {{ currentCountry.subregion }}</h5>
-          <h5>Capital: {{ currentCountry.capital }}</h5>
-          <!-- <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5> -->
+      <div>
+        <div style="font-weight:bold; text-align:center; font-size:4rem; margin-bottom:1rem;">
+          {{ unstubInner(currentCountry.name) }}
         </div>
-        <div class="flag" :style="{ backgroundImage: getBgImage(currentCountry) }"></div>
+
+        <div class="country">
+          <div style="font-size:3rem;">
+            <div><span style="font-weight:bold;">Subregion:</span> {{ currentCountry.subregion }}</div>
+            <div><span style="font-weight:bold;">Capital:</span> {{ currentCountry.capital }}</div>
+            <div>
+              <span style="font-weight:bold;">Area:</span> {{ numberWithCommas(currentCountry.area) }} mi<sup>2</sup>
+            </div>
+            <div><span style="font-weight:bold;">Borders:</span> {{ getBordersRender(currentCountry) }}</div>
+            <div><span style="font-weight:bold;">Languages:</span> {{ getLanguagesRender(currentCountry) }}</div>
+
+            <!-- <h5>Population: {{ numberWithCommas(currentCountry.population) }}</h5> -->
+          </div>
+          <div class="flag" :style="{ backgroundImage: getBgImage(currentCountry) }"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +38,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { unstub } from "@/App.vue";
+import { Getter } from "vuex-class";
 
 interface Country {
   name: string;
@@ -44,6 +55,7 @@ interface Country {
 export default class LearnFlagsComponent extends Vue {
   @Prop({ default: true }) readonly flagFirst: boolean;
   @Prop() readonly countries: Country[];
+  @Getter subregionCountries: any[];
 
   countryIndex = 0;
 
@@ -57,6 +69,8 @@ export default class LearnFlagsComponent extends Vue {
 
   mounted() {
     (this.$refs.inner as HTMLElement).addEventListener("mousedown", (ev: any) => ev.stopPropagation());
+
+    // console.log("sub..", this.subregionCountries);
   }
 
   numberWithCommas(x) {
@@ -82,6 +96,24 @@ export default class LearnFlagsComponent extends Vue {
     } else {
       this.countryIndex -= 1;
     }
+  }
+
+  get allCountries() {
+    return this.subregionCountries.reduce((acc, val) => [...acc, ...val.countries], []);
+  }
+
+  getLanguagesRender(country) {
+    return Object.values(country.languages).reduce((acc, val) => {
+      return acc ? `${acc}, ${val}` : val;
+    }, "");
+  }
+
+  getBordersRender(country) {
+    if (country.borders.length === 0) return "None";
+    return country.borders.reduce((acc, code) => {
+      const c = this.allCountries.find((x) => x.code3 === code);
+      return `${acc ? acc + " " : ""}${c.flag}`;
+    }, "");
   }
 }
 </script>

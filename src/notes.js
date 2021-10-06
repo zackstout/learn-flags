@@ -10,6 +10,8 @@
 // ============================================
 
 // - [x] TODO: Find new data source (preferably stored locally) because our url broke
+// Ahh but we don't have neighbors....or population.....languages...currency...
+
 
 // - [x] TODO/BUG: quiz only getting 3 answers...
 

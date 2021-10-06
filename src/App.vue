@@ -57,6 +57,7 @@ export const getRandom = (min, max) => {
 };
 
 import * as data from "./countries.json";
+import * as data2 from "./countries2.json";
 
 @Component({
   components: {
@@ -113,7 +114,7 @@ export default class App extends Vue {
     onValue(ref(db, "countries"), (snapshot) => {
       const data = snapshot.val();
 
-      // console.log("snapshot"); // only called on first answer click....
+      // console.log("snapshot", data); // only called on first answer click....
 
       this.setDatabaseCountries(
         Object.keys(data).map((name) => {
@@ -130,17 +131,24 @@ export default class App extends Vue {
     // Transform data for markup to consume:
     const allSubregions = {};
 
-    const brokenUrl = "https://restcountries.eu/rest/v2/";
-    const url = "https://github.com/stefangabos/world_countries/blob/master/data/en/countries.json";
+    // const brokenUrl = "https://restcountries.eu/rest/v2/";
+    // const url = "https://github.com/stefangabos/world_countries/blob/master/data/en/countries.json";
 
-    console.log("countries..", data);
+    console.log("countries..", data, "countries2", data2);
 
-    data.forEach((country) => {
-      // console.log("c", country.name);
+    data2.forEach((country) => {
       if (!allSubregions.hasOwnProperty(country.subregion)) {
         allSubregions[country.subregion] = [];
       }
-      allSubregions[country.subregion].push(country);
+      const c = {
+        ...country,
+        ...{
+          name: country.name.common,
+          capital: country.capital[0],
+          code3: country.cca3,
+        },
+      };
+      allSubregions[country.subregion].push(c);
     });
 
     this.setSubregions(
@@ -148,34 +156,6 @@ export default class App extends Vue {
         return { name, values: allSubregions[name] };
       })
     );
-
-    //@ts-ignore
-    // axios.get(url).then((res) => {
-    //   res.data.forEach((row) => {
-    //     if (!allSubregions.hasOwnProperty(row.subregion)) {
-    //       allSubregions[row.subregion] = [];
-    //     }
-    //     allSubregions[row.subregion].push(row);
-
-    //     // Only needed once to init database:
-    //     // this.initData(row);
-    //   });
-
-    //   // this.allSubregions = Object.keys(allSubregions).map((name) => {
-    //   //   return { name, values: allSubregions[name] };
-    //   // });
-    //   this.setSubregions(
-    //     Object.keys(allSubregions).map((name) => {
-    //       return { name, values: allSubregions[name] };
-    //     })
-    //   );
-
-    //   // console.log(
-    //   //   "sub",
-    //   //   Object.keys(allSubregions).map((name) => {
-    //   //     return { name, values: allSubregions[name] };
-    //   //   })
-    //   // );
 
     //   // ==================
     //   // TESTING:

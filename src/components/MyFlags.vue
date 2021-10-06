@@ -1,5 +1,20 @@
 <template>
-  <div style="font-size:1rem; padding:2rem;">
+  <div style="font-size:1rem; padding:2rem; position:relative;">
+    <div class="details-toggle">
+      <div style="display:flex;">
+        <div>Show details:</div>
+        <input type="checkbox" v-model="showDetails" />
+      </div>
+      <div style="display:flex;">
+        <div>Show names:</div>
+        <input type="checkbox" v-model="showNames" />
+      </div>
+      <div style="display:flex;">
+        <div>Flag size:</div>
+        <input type="range" min="5" max="25" v-model="flagSize" />
+      </div>
+    </div>
+
     <div v-for="region in regions" :key="region.name" class="region" :id="stubInner(region.name)">
       <div style="font-size:3.5rem; font-weight:bold;">{{ region.name }}</div>
 
@@ -45,7 +60,7 @@
               </div>
             </div>
 
-            <button @click="takeQuiz(subregion)" style="width:8rem; margin: 0.5rem 0;">
+            <button @click="takeQuiz(subregion)" style="width:8rem; margin: 0.5rem 0 2rem 0;">
               Review
             </button>
           </div>
@@ -58,15 +73,18 @@
               @mouseover="setHoveredAlpha3(country.alpha3Code)"
               @mouseleave="setHoveredAlpha3('')"
             >
-              <div style="font-weight:bold; font-size:1.2rem; max-width:10rem;">{{ unstubInner(country.name) }}</div>
-              <div>
-                <div v-if="country.isUnlocked">
-                  <span style="font-weight:bold;">Capital:</span>&emsp;<span>{{ country.capital }}</span>
-                </div>
-                <div v-else>???</div>
+              <div v-if="showNames" style="font-weight:bold; font-size:1.2rem; max-width:10rem;">
+                {{ unstubInner(country.name) }}
               </div>
+              <div v-if="showDetails">
+                <div>
+                  <div v-if="country.isUnlocked">
+                    <span style="font-weight:bold;">Capital:</span>&emsp;<span>{{ country.capital }}</span>
+                  </div>
+                  <div v-else>???</div>
+                </div>
 
-              <!-- <div>
+                <!-- <div>
                 <div v-if="country.isUnlocked">
                   <span style="font-weight:bold;">Population:</span>&emsp;<span>{{
                     numberWithCommas(country.population)
@@ -75,28 +93,43 @@
                 <div v-else>???</div>
               </div> -->
 
-              <div>
+                <!-- <div>
                 <div v-if="country.isUnlocked">
                   <span style="font-weight:bold;">Alpha3:</span>&emsp;<span>{{ country.code3 }}</span>
                 </div>
                 <div v-else>???</div>
-              </div>
+              </div> -->
 
-              <div>
-                <div v-if="country.isUnlocked">
-                  <span style="font-weight:bold;">Score:</span>&emsp;<span
-                    >{{ country.numCorrect }} / {{ country.numAttempts }}</span
-                  >
+                <div>
+                  <div v-if="country.isUnlocked">
+                    <span style="font-weight:bold;">Language:</span>&emsp;<span>{{ getLanguagesRender(country) }}</span>
+                  </div>
+                  <div v-else>???</div>
                 </div>
-                <div v-else>???</div>
+
+                <div>
+                  <div v-if="country.isUnlocked" style="">
+                    <span style="font-weight:bold;">Neighbors:</span>&emsp;<span>{{ getBordersRender(country) }}</span>
+                  </div>
+                  <div v-else>???</div>
+                </div>
+
+                <div>
+                  <div v-if="country.isUnlocked">
+                    <span style="font-weight:bold;">Score:</span>&emsp;<span
+                      >{{ country.numCorrect }} / {{ country.numAttempts }}</span
+                    >
+                  </div>
+                  <div v-else>???</div>
+                </div>
               </div>
 
               <div
                 class="flag-img"
                 :style="{
                   backgroundImage: country.isUnlocked ? getBgImage(country) : '',
-                  width: '10vw',
-                  height: '10vh',
+                  width: flagSize + 'vw',
+                  height: flagSize + 'vh',
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
@@ -207,7 +240,7 @@ export const REGIONS = [
   },
   {
     name: "Americas",
-    subregions: ["Caribbean", "Central America", "South America", "Northern America"],
+    subregions: ["Caribbean", "Central America", "South America", "North America"],
   },
   {
     name: "Africa",
@@ -238,6 +271,10 @@ export default class MyFlagsComponent extends Vue {
 
   @Mutation setHoveredAlpha3: (x: string) => void;
   @State hoveredAlpha3: string;
+
+  showDetails = true;
+  showNames = true;
+  flagSize = 10;
 
   regions = REGIONS;
   countriesForMap = [];
@@ -281,7 +318,7 @@ export default class MyFlagsComponent extends Vue {
   takeQuiz(region: string) {
     const pool = this.getCountries(region);
     const quiz = generateQuizIndices(pool, 5);
-    console.log("new quiz", quiz);
+    // console.log("new quiz", quiz);
     this.setQuizIndices(quiz);
     this.setQuizPool(pool);
   }
@@ -303,9 +340,9 @@ export default class MyFlagsComponent extends Vue {
     newFlags.forEach((country) => {
       const info = {
         isUnlocked: true,
-        lastReviewed: country.lastReviewed,
-        numAttempts: country.numAttempts,
-        numCorrect: country.numCorrect,
+        lastReviewed: country.lastReviewed ?? "",
+        numAttempts: country.numAttempts ?? 0,
+        numCorrect: country.numCorrect ?? 0,
       };
 
       // THIS WORKED
@@ -372,7 +409,7 @@ export default class MyFlagsComponent extends Vue {
   }
 
   numSuccesses(countries) {
-    return countries.reduce((acc, country) => acc + country.numCorrect, 0);
+    return countries.reduce((acc, country) => acc + (country.numCorrect ?? 0), 0);
   }
 
   hasEnoughSuccesses(countries) {
@@ -444,7 +481,7 @@ export default class MyFlagsComponent extends Vue {
 
   totalReviews(subregion: string) {
     const countries = this.getCountries(subregion);
-    return countries.reduce((acc, country) => acc + country.numAttempts, 0);
+    return countries.reduce((acc, country) => acc + (country.numAttempts ?? 0), 0);
   }
 
   totalUnlocked(subregion: string) {
@@ -497,6 +534,24 @@ export default class MyFlagsComponent extends Vue {
       d: this.path(geom),
     };
   }
+
+  get allCountries() {
+    return this.subregionCountries.reduce((acc, val) => [...acc, ...val.countries], []);
+  }
+
+  getLanguagesRender(country) {
+    return Object.values(country.languages).reduce((acc, val) => {
+      return acc ? `${acc}, ${val}` : val;
+    }, "");
+  }
+
+  getBordersRender(country) {
+    if (country.borders.length === 0) return "None";
+    return country.borders.reduce((acc, code) => {
+      const c = this.allCountries.find((x) => x.code3 === code);
+      return `${acc ? acc + " " : ""}${c.flag}`;
+    }, "");
+  }
 }
 </script>
 
@@ -521,15 +576,34 @@ export default class MyFlagsComponent extends Vue {
 }
 
 .country {
-  margin: 0 2rem 2rem 0;
+  margin: 0 1rem 1rem 0;
+  /* max-width: 15vw; */
+  padding: 1rem;
+  border-radius: 0.3rem;
+}
+
+.country:hover {
+  background: rgba(180, 180, 180, 0.15);
 }
 
 .flag-img {
-  opacity: 0.9;
+  /* opacity: 0.9; */
   filter: drop-shadow(2px 2px 3px black);
 }
 
 .flag-img:hover {
   opacity: 1;
+}
+
+.details-toggle {
+  position: fixed;
+  top: 0rem;
+  right: 0rem;
+  display: flex;
+  flex-direction: column;
+  background: rgb(240, 236, 236);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  z-index: 1000;
 }
 </style>
